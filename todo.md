@@ -12,6 +12,8 @@
 - 品牌源文件放在 `navigate-brand/`，运行时副本在 `frontend/public/brand/`。
 - 仍缺：宋体 outlined 字标、纸纹、空状态插画、1200×630 OG 图；这些不影响先发布当前纸面系统。
 
+- 已去掉前台流程说明和日报“本期整理 N 条”盘点导语；空导语不再渲染，刊头只保留出版日期。
+
 ## 当前任务：本机 Docker + Cloudflare Tunnel 发布（2026-09-02）
 
 - [ ] 为后端、前端和 cloudflared 增加 Docker Compose 编排，复用现有 SQLite 数据。

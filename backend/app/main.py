@@ -881,16 +881,18 @@ def topic_daily_report_document(
         db, topic, {story.content_item_id for story in report.stories}
     )
     ordered_refs = [f"content:{story.content_item_id}" for story in report.stories]
+    lead = editorial.get("daily_lead") or {}
     report = replace(
         report,
         editorial={
             **editorial,
             "daily_lead": {
-                "deck": f"{topic.name} · 每日资讯",
-                "text": f"本期整理 {len(report.stories)} 条与“{topic.name}”相关的已发布资讯。",
-                "story_refs": ordered_refs,
+                "deck": str(lead.get("deck") or topic.name).strip(),
+                "text": str(lead.get("text") or "").strip(),
+                "story_refs": list(lead.get("story_refs") or ordered_refs),
             },
-            "sections": [
+            "sections": editorial.get("sections")
+            or [
                 {
                     "title": "本期资讯",
                     "intro": "",

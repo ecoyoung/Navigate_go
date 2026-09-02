@@ -133,7 +133,9 @@ def test_daily_report_uses_shanghai_date_and_escapes_content(session_factory):
         assert "https://report.example.com/story" in rendered
         assert "window.print()" in rendered
         assert "2026 年 08 月 28 日出版" in rendered
-        assert "覆盖 2026 年 08 月 27 日 发布内容" in rendered
+        assert "覆盖" not in rendered
+        assert "本期收录" not in rendered
+        assert "本期整理" not in rendered
         assert "本期数据概览" not in rendered
         assert "近 7 日故事" not in rendered
         assert "CST" not in rendered
@@ -329,3 +331,6 @@ def test_topic_daily_report_endpoint_renders_chinese_html(client, session_factor
     response = client.get(f"/api/v1/topics/{topic_id}/daily-reports/2026-08-30")
     assert response.status_code == 200
     assert "中文主题标题" in response.text
+    assert "主题日报" in response.text
+    assert "本期整理" not in response.text
+    assert "已发布资讯" not in response.text

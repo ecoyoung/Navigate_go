@@ -204,7 +204,7 @@ class DeepSeekClient:
 
 
 CONTENT_SYSTEM_PROMPT = """你是中文资讯编辑。仅依据 evidence 和本次 domain_policy 输出 JSON。schema_version 固定为 content_editorial.zh.v2，每个 content_ref 按原顺序输出一次。生成中文标题及 title_evidence_refs；标题必须包含自然中文表达，品牌和产品专名可以保留原文，但不能让整条标题只有外文、数字或符号。生成1—3 个 summary_units，每句 claim_ref 格式为 content:id#summary:序号；0—8 个 tags。tags 的 tag_key 和 label_zh 必须逐字取自 domain_policy.tag_catalog，不得创造近义标签；kind 只能为 entity/topic/event/product/geography/other。所有标题、摘要句和标签必须绑定该篇 evidence_refs。不得补充背景、常识、因果、影响、预测或评价。数字不是核心事实时应省略；确需使用时必须在 evidence 中存在，保留原数字形式、单位和百分号，不得换算或改写。JSON 形状：{"schema_version":"content_editorial.zh.v2","items":[{"content_ref":"content:id","input_content_hash":"sha256","chinese_title":"string","title_evidence_refs":["ref"],"summary_units":[{"claim_ref":"content:id#summary:1","text_zh":"string","evidence_refs":["ref"]}],"tags":[{"tag_key":"policy_key","label_zh":"政策中的中文名","kind":"topic","confidence":0.8,"evidence_refs":["ref"]}]}]}"""
-EDITION_SYSTEM_PROMPT = """你是中文日报编排编辑。只使用已校验的单篇工件、事件关系、确定性 metrics 和领域 policy 输出 JSON。schema_version 固定为 daily_edition.zh.v1。只能使用 policy.section_catalog 中的 section_key，title 必须逐字复制对应栏目标题；只输出有故事的栏目并遵守 layout_policy 与 ranking_policy。输入会额外提供 expected_story_refs；输出前必须逐项核对：expected_story_refs 中每一项都要在所有 section.story_refs 中恰好出现一次，不得新增、遗漏、重复、改写或合并；sections 数组和每个 story_refs 数组的顺序就是最终版面顺序。intro_story_refs 必须是本栏目 story_refs 的非空子集。不得用正文长度直接判断重要性，不得从共同标签推断趋势，不得补充因果、影响、预测或市场结论。JSON 形状：{"schema_version":"daily_edition.zh.v1","daily_lead":{"deck":"string","text":"string","story_refs":["story_ref"]},"sections":[{"section_key":"policy_key","title":"政策中的栏目标题","intro":"中文导语","intro_story_refs":["story_ref"],"story_refs":["story_ref"]}]}"""
+EDITION_SYSTEM_PROMPT = """你是中文日报编排编辑。只使用已校验的单篇工件、事件关系、确定性 metrics 和领域 policy 输出 JSON。schema_version 固定为 daily_edition.zh.v1。只能使用 policy.section_catalog 中的 section_key，title 必须逐字复制对应栏目标题；只输出有故事的栏目并遵守 layout_policy 与 ranking_policy。输入会额外提供 expected_story_refs；输出前必须逐项核对：expected_story_refs 中每一项都要在所有 section.story_refs 中恰好出现一次，不得新增、遗漏、重复、改写或合并；sections 数组和每个 story_refs 数组的顺序就是最终版面顺序。intro_story_refs 必须是本栏目 story_refs 的非空子集。不得用正文长度直接判断重要性，不得从共同标签推断趋势，不得补充因果、影响、预测或市场结论。daily_lead 只写本期事实要点，禁止“本期整理/收录N条”“与某某相关的已发布资讯”等计数或流程说明。JSON 形状：{"schema_version":"daily_edition.zh.v1","daily_lead":{"deck":"string","text":"string","story_refs":["story_ref"]},"sections":[{"section_key":"policy_key","title":"政策中的栏目标题","intro":"中文导语","intro_story_refs":["story_ref"],"story_refs":["story_ref"]}]}"""
 
 
 def _stable_hash(value: object) -> str:
@@ -720,10 +720,12 @@ def _derive_subset_edition(
         schema_version=EDITION_SCHEMA_VERSION,
         daily_lead=DailyLead(
             deck=_bounded_copy(
-                ["本期关注", *[title_for(ref) for ref in ordered_refs]], 100
+                [title_for(ref) for ref in ordered_refs], 100
             ),
             text=_bounded_copy(
-                ["本期资讯", *[summary_for(ref) for ref in ordered_refs]], 360
+                [title_for(ref) for ref in ordered_refs]
+                + [summary_for(ref) for ref in ordered_refs],
+                360,
             ),
             story_refs=ordered_refs,
         ),

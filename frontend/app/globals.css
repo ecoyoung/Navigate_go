@@ -133,7 +133,7 @@ a { color: inherit; }
 }
 .onboarding-sheet { width: min(760px, 100%); padding: 56px 48px 44px; text-align: center; }
 .login-card h1 {
-  margin: 0;
+  margin: 0 0 22px;
   font: 700 clamp(26px, 4vw, 36px) / 1.2 var(--serif);
   letter-spacing: 0.03em;
   text-wrap: balance;
@@ -151,7 +151,7 @@ a { color: inherit; }
   font-size: 16px;
   line-height: 1.7;
 }
-.onboarding-sheet form { display: grid; gap: 12px; max-width: 640px; margin: 0 auto; text-align: left; }
+.onboarding-sheet form { display: grid; gap: 12px; max-width: 640px; margin: 22px auto 0; text-align: left; }
 .onboarding-sheet textarea { min-height: 120px; }
 
 .collection-progress {

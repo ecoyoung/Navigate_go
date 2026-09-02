@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import re
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
@@ -429,20 +430,27 @@ def _section_html(
     </section>"""
 
 
+_CENSUS_LEAD = re.compile(
+    r"本期(整理|收录).{0,48}(条|个).{0,24}(相关|已发布|独立来源)"
+)
+
+
+def _reader_kicker(value: object, fallback: str = "") -> str:
+    text = str(value or "").strip()
+    if not text or _CENSUS_LEAD.search(text):
+        return fallback
+    return text
+
+
 def render_daily_report(data: DailyReportData) -> str:
-    source_total = len({story.source_name for story in data.stories})
-    display_date = data.report_date.strftime("%Y 年 %m 月 %d 日")
     masthead_date = data.report_date.strftime("%Y.%m.%d")
     editorial = data.editorial or {}
     editorial_stories = {
         item.get("story_key"): item for item in editorial.get("stories", []) if item.get("story_key")
     }
     daily_lead = editorial.get("daily_lead") or {}
-    deck = str(daily_lead.get("deck") or f"{data.domain_name}领域 · 每日重要资讯")
-    lead = str(
-        daily_lead.get("text")
-        or f"本期收录 {len(data.stories)} 个故事，来自 {source_total} 个独立来源。"
-    )
+    deck = _reader_kicker(daily_lead.get("deck"), data.domain_name)
+    lead = _reader_kicker(daily_lead.get("text"))
     story_by_key = {
         (f"event:{story.event_id}" if story.event_id else f"content:{story.content_item_id}"): story
         for story in data.stories
@@ -579,13 +587,10 @@ def render_daily_report(data: DailyReportData) -> str:
       </svg>
       <p class="eyebrow">Navigate · 每日简报</p>
       <h1>每日资讯简报</h1>
-      <p class="deck">{html.escape(deck)}</p>
-      <div class="edition"><span>{data.issue_date.strftime('%Y 年 %m 月 %d 日')}出版</span>
-        <span>覆盖 {display_date} 发布内容</span></div>
+      {f'<p class="deck">{html.escape(deck)}</p>' if deck else ''}
+      <div class="edition"><span>{data.issue_date.strftime('%Y 年 %m 月 %d 日')}出版</span></div>
     </header>
-    <section class="lead">
-      <p>{html.escape(lead)}</p>
-    </section>
+    {f'<section class="lead"><p>{html.escape(lead)}</p></section>' if lead else ''}
     {sections}
     <footer>原文版权归各来源所有</footer>
   </main>
