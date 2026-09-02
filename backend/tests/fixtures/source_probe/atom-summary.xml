@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Example Atom</title>
+  <id>https://example.com/atom.xml</id>
+  <entry>
+    <title>Atom story</title>
+    <id>tag:example.com,2026:1</id>
+    <link href="https://example.com/news/atom-story" />
+    <summary>Only a summary is available.</summary>
+  </entry>
+</feed>

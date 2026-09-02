@@ -1,0 +1,30 @@
+{
+  "name": "navigate-industry-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "local": "npm run build && python3 -m http.server 3000 --bind 127.0.0.1 --directory dist/client",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.37.1",
+    "@cloudflare/workers-types": "4.20260515.1",
+    "@openai/sites-vite-plugin": "^0.1.0 || ^0.2.0",
+    "@types/node": "22.19.19",
+    "@vitejs/plugin-vue": "6.0.8",
+    "typescript": "5.9.3",
+    "vite": "8.0.13",
+    "vue-tsc": "3.3.11",
+    "wrangler": "4.92.0"
+  },
+  "type": "module"
+}

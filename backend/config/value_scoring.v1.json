@@ -1,0 +1,63 @@
+{
+  "schema_version": "content-value-scoring-config.v1",
+  "algorithm_version": "deterministic-value.v1",
+  "selection_threshold": 50.0,
+  "weights": {
+    "recency": 0.25,
+    "source_quality": 0.20,
+    "completeness": 0.20,
+    "corroboration": 0.25,
+    "confirmed_entities": 0.00,
+    "domain_confidence": 0.10
+  },
+  "recency": {
+    "full_score_hours": 24,
+    "zero_score_hours": 168
+  },
+  "source_quality": {
+    "default": 0.65,
+    "by_source_type": {
+      "research_media": 0.95,
+      "association": 0.90,
+      "trade_media": 0.85,
+      "business_media": 0.80,
+      "data_platform": 0.80,
+      "data_media": 0.80,
+      "wechat_official_account": 0.72,
+      "consumer_media": 0.65
+    }
+  },
+  "completeness": {
+    "body_status_scores": {
+      "complete": 1.0,
+      "partial": 0.35,
+      "unknown": 0.60
+    },
+    "full_body_chars": 1200,
+    "access_scores": {
+      "public": 1.0,
+      "partial": 0.60,
+      "subscriber": 0.45
+    },
+    "default_access_score": 0.60,
+    "weights": {
+      "body_status": 0.50,
+      "body_presence": 0.30,
+      "access": 0.20
+    }
+  },
+  "corroboration": {
+    "two_sources": 0.70,
+    "full_score_sources": 3
+  },
+  "confirmed_entities": {
+    "full_score_count": 3
+  },
+  "penalties": {
+    "sponsored": 25.0
+  },
+  "selection_gates": [
+    "missing_published_at",
+    "duplicate"
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": "editorial-policy.v1",
+  "domain_key": "beauty",
+  "taxonomy_version": "beauty-editorial.v1",
+  "tag_catalog": [
+    {
+      "tag_key": "capital_activity",
+      "title": "资本活动",
+      "definition": "融资、并购、IPO、估值及其他明确的资本动作。",
+      "aliases": ["融资", "并购", "ipo", "估值", "finance"]
+    },
+    {
+      "tag_key": "regulation",
+      "title": "监管政策",
+      "definition": "法规、监管决定、合规要求和政策变化。",
+      "aliases": ["监管", "法规", "合规", "regulatory"]
+    },
+    {
+      "tag_key": "company_strategy",
+      "title": "公司战略",
+      "definition": "公司经营战略、组织调整、管理层和业务扩张动作。",
+      "aliases": ["战略", "管理层", "组织", "strategy", "companies"]
+    },
+    {
+      "tag_key": "brand_development",
+      "title": "品牌发展",
+      "definition": "品牌定位、品牌组合、市场进入和品牌层面的经营变化。",
+      "aliases": ["品牌", "brand", "brands", "indie_brands"]
+    },
+    {
+      "tag_key": "product_launch",
+      "title": "产品发布",
+      "definition": "新品上市、产品线扩充和明确的产品发布动作。",
+      "aliases": ["新品", "发布", "launch", "products"]
+    },
+    {
+      "tag_key": "research_innovation",
+      "title": "研发创新",
+      "definition": "配方、成分、技术、专利、科研和制造创新。",
+      "aliases": ["研发", "配方", "成分", "ingredients", "research", "formulation"]
+    },
+    {
+      "tag_key": "market_channel",
+      "title": "市场渠道",
+      "definition": "零售、电商、门店、分销、消费者和地域市场变化。",
+      "aliases": ["零售", "电商", "渠道", "消费者", "retail", "market"]
+    },
+    {
+      "tag_key": "marketing",
+      "title": "营销传播",
+      "definition": "营销活动、广告、内容传播、代言与消费者沟通。",
+      "aliases": ["营销", "广告", "传播", "marketing"]
+    }
+  ],
+  "section_catalog": [
+    {
+      "section_key": "capital_policy",
+      "title": "资本与监管",
+      "definition": "融资、并购、IPO、估值、法规与监管变化。",
+      "tag_keys": ["capital_activity", "regulation"],
+      "is_fallback": false
+    },
+    {
+      "section_key": "company_strategy",
+      "title": "公司与品牌",
+      "definition": "公司战略、组织管理、品牌扩张与经营动作。",
+      "tag_keys": ["company_strategy", "brand_development"],
+      "is_fallback": false
+    },
+    {
+      "section_key": "product_innovation",
+      "title": "产品与创新",
+      "definition": "新品、产品线、配方、成分、研发和技术创新。",
+      "tag_keys": ["product_launch", "research_innovation"],
+      "is_fallback": false
+    },
+    {
+      "section_key": "market_channel",
+      "title": "市场与渠道",
+      "definition": "零售、电商、门店、消费者、营销与渠道合作。",
+      "tag_keys": ["market_channel", "marketing"],
+      "is_fallback": false
+    },
+    {
+      "section_key": "general",
+      "title": "行业动态",
+      "definition": "缺少足够证据归入其他栏目的美妆行业相关资讯。",
+      "tag_keys": [],
+      "is_fallback": true
+    }
+  ],
+  "layout_policy": {
+    "max_sections": 4,
+    "preferred_min_stories_per_section": 2,
+    "allow_single_story_section": false,
+    "fallback_section_key": "general"
+  },
+  "ranking_policy": {
+    "section_order": [
+      "capital_policy",
+      "company_strategy",
+      "product_innovation",
+      "market_channel",
+      "general"
+    ],
+    "story_priority_tags": [
+      "regulation",
+      "capital_activity",
+      "company_strategy",
+      "product_launch",
+      "research_innovation",
+      "market_channel",
+      "marketing",
+      "brand_development"
+    ],
+    "story_tie_breakers": [
+      "cross_source_corroboration",
+      "content_completeness",
+      "published_at_desc",
+      "story_key_asc"
+    ]
+  }
+}

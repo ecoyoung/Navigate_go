@@ -1,0 +1,18 @@
+[
+  {
+    "id": "wechat_redfox_36kr",
+    "name": "36氪公众号",
+    "region": "CN",
+    "language": "zh-CN",
+    "status": "succeeded",
+    "coverage_date": "2026-08-30",
+    "fetched": 7,
+    "new": 7,
+    "updated": 0,
+    "skipped": 0,
+    "rejected": 0,
+    "errors": 0,
+    "error_code": null,
+    "error_summary": null
+  }
+]

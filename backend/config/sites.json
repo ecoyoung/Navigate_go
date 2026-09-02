@@ -1,0 +1,1007 @@
+{
+  "sources": [
+    {
+      "id": "beautymatter",
+      "name": "BeautyMatter",
+      "start_url": "https://beautymatter.com/articles",
+      "source_region": "GLOBAL",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "brands",
+        "retail",
+        "industry"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": ".articles article a[href]",
+        "card_selector": "article",
+        "exclude_card_selector": ".premium-bar",
+        "article_url_pattern": "^https://beautymatter\\.com/articles/(?!tag:)[^?]+$",
+        "body_selector": ".paywall .module.rich-text .container.boxed.text",
+        "author_selector": ".author-list .author",
+        "date_selector": ".date.desktop-only",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "retry_attempts": 2,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "beauty_independent",
+      "name": "Beauty Independent",
+      "start_url": "https://www.beautyindependent.com/",
+      "source_region": "US",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "indie_brands",
+        "finance",
+        "retail"
+      ],
+      "crawl_strategy": "browser",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.beautyindependent\\.com/(?!premium|category|tag|author)[^/]+/$",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "glossy_beauty",
+      "name": "Glossy Beauty",
+      "start_url": "https://www.glossy.co/beauty/",
+      "source_region": "US",
+      "source_type": "business_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "fashion",
+        "retail",
+        "marketing"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.glossy\\.co/beauty/",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "wwd_beauty",
+      "name": "WWD Beauty",
+      "start_url": "https://wwd.com/beauty-industry-news/",
+      "source_region": "US",
+      "source_type": "business_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "brands",
+        "finance",
+        "retail"
+      ],
+      "crawl_strategy": "metadata_only",
+      "parser_config": {
+        "article_url_pattern": "^https://wwd\\.com/beauty-industry-news/(?:fragrance|color-cosmetics|hair|beauty-features|skin-care|wellness|body-care|products)/.+",
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "subscriber"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "vogue_business_beauty",
+      "name": "Vogue Business Beauty",
+      "start_url": "https://www.vogue.com/business/beauty",
+      "source_region": "GLOBAL",
+      "source_type": "business_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "luxury",
+        "strategy",
+        "retail"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.vogue\\.com/article/",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "cosmetics_design",
+      "name": "CosmeticsDesign",
+      "start_url": "https://www.cosmeticsdesign.com/Headlines/",
+      "source_region": "GLOBAL",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "cosmetics",
+        "ingredients",
+        "regulatory",
+        "supply_chain"
+      ],
+      "crawl_strategy": "unavailable",
+      "skip_reason": "发布方已关闭 CosmeticsDesign 站点，主页和 Headlines 当前返回 410；仅保留历史目录记录。",
+      "parser_config": {
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "premium_beauty_news",
+      "name": "Premium Beauty News",
+      "start_url": "https://www.premiumbeautynews.com/spip.php?page=backend&lang=en",
+      "source_region": "EU",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "ingredients",
+        "packaging",
+        "companies"
+      ],
+      "crawl_strategy": "feed",
+      "parser_config": {
+        "discovery_method": "feed",
+        "article_url_pattern": "^https://www\\.premiumbeautynews\\.com/en/.+(?:,|%2C)\\d+$",
+        "body_selector": ".article-text",
+        "date_selector": ".header-date span",
+        "tag_selector": ".article-rubtitre a",
+        "publication_timezone": "Europe/Paris",
+        "max_articles": 1,
+        "request_delay_seconds": 1.0,
+        "access_level": "public",
+        "content_completeness": "full"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "beauty_packaging",
+      "name": "Beauty Packaging",
+      "start_url": "https://www.beautypackaging.com/",
+      "source_region": "US",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "packaging",
+        "design",
+        "regulatory"
+      ],
+      "crawl_strategy": "browser",
+      "parser_config": {
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "happi",
+      "name": "HAPPI",
+      "start_url": "https://www.happi.com/",
+      "source_region": "US",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "personal_care",
+        "cosmetics",
+        "manufacturing"
+      ],
+      "crawl_strategy": "browser",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.happi\\.com/breaking-news/",
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "beauty",
+          "cosmetic",
+          "skincare",
+          "fragrance",
+          "personal care"
+        ]
+      }
+    },
+    {
+      "id": "cosmetics_toiletries",
+      "name": "Cosmetics & Toiletries",
+      "start_url": "https://www.cosmeticsandtoiletries.com/news",
+      "source_region": "US",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "cosmetics",
+        "formulation",
+        "ingredients",
+        "research"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "cosmetics_business",
+      "name": "Cosmetics Business",
+      "start_url": "https://cosmeticsbusiness.com/",
+      "source_region": "UK",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "regulatory",
+        "companies",
+        "retail"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": ".block-companies a[href]",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "subscriber"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "business_of_fashion_beauty",
+      "name": "The Business of Fashion Beauty",
+      "start_url": "https://www.businessoffashion.com/topics/beauty/",
+      "source_region": "GLOBAL",
+      "source_type": "business_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "luxury",
+        "finance",
+        "strategy"
+      ],
+      "crawl_strategy": "metadata_only",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.businessoffashion\\.com/articles/beauty/",
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "subscriber"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "allure_beauty_industry",
+      "name": "Allure Beauty Industry",
+      "start_url": "https://www.allure.com/topic/beauty-industry",
+      "source_region": "US",
+      "source_type": "consumer_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "brands",
+        "industry",
+        "trends"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.allure\\.com/story/",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "byrdie_news",
+      "name": "Byrdie News",
+      "start_url": "https://www.byrdie.com/product-and-brand-news-5072507",
+      "source_region": "US",
+      "source_type": "consumer_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "brands",
+        "trends",
+        "innovation"
+      ],
+      "crawl_strategy": "blocked",
+      "skip_reason": "Byrdie robots/站点声明禁止未经书面许可的自动抓取、数据挖掘和创建数据集。",
+      "parser_config": {
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "brand",
+          "launch",
+          "retail",
+          "industry",
+          "technology",
+          "innovation",
+          "market"
+        ],
+        "event_keywords": [
+          "launch",
+          "brand",
+          "market",
+          "retail",
+          "technology",
+          "innovation"
+        ]
+      }
+    },
+    {
+      "id": "newbeauty_news",
+      "name": "NewBeauty",
+      "start_url": "https://www.newbeauty.com/tag/beauty-news/",
+      "source_region": "US",
+      "source_type": "consumer_media",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "retail",
+        "aesthetics",
+        "technology"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "the_klog",
+      "name": "The Klog",
+      "start_url": "https://sokoglam.com/blogs/theklog?page=1",
+      "source_region": "KR",
+      "source_type": "consumer_media",
+      "default_language": "en",
+      "source_tags": [
+        "k_beauty",
+        "brands",
+        "ingredients",
+        "trends"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": "a[href]",
+        "article_url_pattern": "^https://sokoglam\\.com/blogs/theklog/[^/?#]+$",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "brand",
+          "industry",
+          "trend",
+          "innovation",
+          "technology",
+          "ingredient"
+        ]
+      }
+    },
+    {
+      "id": "global_cosmetics_news",
+      "name": "Global Cosmetics News",
+      "start_url": "https://globalcosmeticsnews.com/post-sitemap1.xml",
+      "source_region": "GLOBAL",
+      "source_type": "trade_media",
+      "default_language": "en",
+      "source_tags": [
+        "cosmetics",
+        "finance",
+        "manufacturing",
+        "regulatory"
+      ],
+      "crawl_strategy": "sitemap",
+      "parser_config": {
+        "discovery_method": "sitemap",
+        "article_url_pattern": "^https://www\\.globalcosmeticsnews\\.com/.+/$",
+        "max_articles": 1,
+        "request_delay_seconds": 1.0,
+        "access_level": "public",
+        "roundup_keywords": [
+          "weekly review",
+          "roundup"
+        ]
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "cew",
+      "name": "Cosmetic Executive Women",
+      "start_url": "https://cew.org/feed/",
+      "source_region": "US",
+      "source_type": "association",
+      "default_language": "en",
+      "source_tags": [
+        "beauty",
+        "executives",
+        "brands",
+        "industry"
+      ],
+      "crawl_strategy": "feed",
+      "parser_config": {
+        "discovery_method": "feed",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "huazhuangpinbao",
+      "name": "化妆品报",
+      "start_url": "https://www.hzpb.com.cn/ldcms/zixun.html",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "美妆",
+        "品牌",
+        "渠道",
+        "监管"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.hzpb\\.com\\.cn/ldcms/zixun/\\d+\\.html$",
+        "body_selector": ".anim.fadeIn",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "c2cc",
+      "name": "C2CC传媒",
+      "start_url": "https://www.c2cc.cn/",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "化妆品",
+        "品牌",
+        "新品",
+        "产业链"
+      ],
+      "crawl_strategy": "json_api",
+      "parser_config": {
+        "discovery_method": "json",
+        "discovery_url": "https://www.c2cc.cn/web/wnews.zwh?do=getNewsList",
+        "discovery_http_method": "POST",
+        "discovery_form": {
+          "index": "0"
+        },
+        "items_path": "newsList",
+        "article_url_template": "/news/{news_id}.html",
+        "article_url_pattern": "^https://www\\.c2cc\\.cn/news/\\d{8}\\.html$",
+        "title_selector": "#showTitle, .show-title",
+        "body_selector": "#articleDetail, .article-detail",
+        "max_articles": 1,
+        "retry_attempts": 2,
+        "http_timeout_seconds": 25,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "jumeili",
+      "name": "聚美丽",
+      "start_url": "https://www.jumeili.cn/news/",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "美妆",
+        "品牌",
+        "科研",
+        "零售"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.jumeili\\.cn/news/view/\\d+\\.html$",
+        "body_selector": ".entry",
+        "min_content_chars": 100,
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "qingyan",
+      "name": "青眼",
+      "start_url": "https://www.iqingyan.cn/index.aspx",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "化妆品",
+        "品牌",
+        "市场",
+        "监管"
+      ],
+      "crawl_strategy": "json_api",
+      "parser_config": {
+        "discovery_method": "json",
+        "discovery_url": "https://www.iqingyan.cn/handlers/IndexHandler.ashx?PageNum=1",
+        "items_path": "",
+        "article_url_template": "/Details.aspx?id={Id}&type={article_Type}",
+        "title_selector": ".new-word h2",
+        "body_selector": ".new-word",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "weilaiji",
+      "name": "未来迹",
+      "start_url": "https://www.fbeauty.cn/",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "美妆",
+        "消费",
+        "品牌"
+      ],
+      "crawl_strategy": "blocked",
+      "skip_reason": "真实官网 robots.txt 明确 User-agent: * Disallow: /，不执行抓取。",
+      "parser_config": {
+        "access_level": "robots_blocked"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "pinguan",
+      "name": "品观",
+      "start_url": "https://www.pinguan.com/article/index/categoryid/626",
+      "source_region": "CN",
+      "source_type": "trade_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "化妆品",
+        "品牌",
+        "零售",
+        "渠道"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": "a[href]",
+        "article_url_pattern": "^https://www\\.pinguan\\.com/article/content/\\d+\\.html$",
+        "body_selector": ".main_con",
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "dedicated"
+      }
+    },
+    {
+      "id": "daofresearch",
+      "name": "刀法研究所",
+      "start_url": "https://www.daofresearch.com/",
+      "source_region": "CN",
+      "source_type": "business_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "消费品牌",
+        "营销",
+        "增长",
+        "美妆"
+      ],
+      "crawl_strategy": "unavailable",
+      "skip_reason": "主页与 robots.txt 在首轮审计中持续超时，待恢复后重新验证。",
+      "parser_config": {
+        "access_level": "unknown"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "香氛",
+          "个护"
+        ]
+      }
+    },
+    {
+      "id": "cbndata",
+      "name": "CBNData",
+      "start_url": "https://www.cbndata.com/information",
+      "source_region": "CN",
+      "source_type": "data_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "消费趋势",
+        "品牌",
+        "电商",
+        "行业报告"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": "a[href]",
+        "article_url_pattern": "^https://www\\.cbndata\\.com/information/\\d+(?:\\?.*)?$",
+        "body_selector": "section.content",
+        "max_articles": 1,
+        "candidate_scan_limit": 20,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "香水",
+          "香氛",
+          "个护"
+        ]
+      }
+    },
+    {
+      "id": "iresearch",
+      "name": "艾瑞咨询",
+      "start_url": "https://www.iresearch.com.cn/report.shtml?type=3",
+      "source_region": "CN",
+      "source_type": "research_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "研究报告",
+        "消费",
+        "电商",
+        "数字营销"
+      ],
+      "crawl_strategy": "metadata_only",
+      "parser_config": {
+        "discovery_method": "json",
+        "discovery_url": "https://www.iresearch.com.cn/api/products/ireports?pindex=1&psize=10",
+        "items_path": "List",
+        "article_url_template": "/api/products/ireport?rid={id}",
+        "article_response_format": "json",
+        "json_item_path": "List",
+        "json_title_path": "reportname",
+        "json_body_path": "shortcoutent",
+        "json_description_path": "shortcoutent",
+        "json_date_path": "addtime",
+        "json_canonical_url_template": "https://www.iresearch.com.cn/report/detail?id={id}",
+        "content_type": "report",
+        "min_content_chars": 80,
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "个护"
+        ]
+      }
+    },
+    {
+      "id": "mktindex",
+      "name": "魔镜市场情报",
+      "start_url": "https://www.mktindex.com/research/notebook/",
+      "source_region": "CN",
+      "source_type": "data_platform",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "电商数据",
+        "品牌",
+        "品类",
+        "行业报告"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": "a[href]",
+        "article_url_pattern": "^https://www\\.mktindex\\.com/research/notebook/article_\\d+$",
+        "title_selector": "#notebook h1",
+        "body_selector": "#notebook",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "护肤",
+          "彩妆",
+          "香氛",
+          "个护"
+        ]
+      }
+    },
+    {
+      "id": "chanmama",
+      "name": "蝉妈妈",
+      "start_url": "https://www.chanmama.com/open/sitemap.xml",
+      "source_region": "CN",
+      "source_type": "data_platform",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "抖音电商",
+        "品牌",
+        "达人",
+        "商品"
+      ],
+      "crawl_strategy": "blocked",
+      "skip_reason": "robots.txt 明确禁止报告、热点和详情正文路径；公开 sitemap 仅保留实体 URL 元数据。",
+      "parser_config": {
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "partial"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "护肤",
+          "彩妆",
+          "香水",
+          "个护"
+        ]
+      }
+    },
+    {
+      "id": "ebrun",
+      "name": "亿邦动力",
+      "start_url": "https://www.ebrun.com/brands/",
+      "source_region": "CN",
+      "source_type": "business_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "电商",
+        "品牌",
+        "零售",
+        "新消费"
+      ],
+      "crawl_strategy": "browser",
+      "parser_config": {
+        "max_articles": 1,
+        "retry_attempts": 1,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "香水",
+          "香氛",
+          "个护",
+          "欧莱雅",
+          "珀莱雅",
+          "雅诗兰黛"
+        ],
+        "event_keywords": [
+          "品牌",
+          "融资",
+          "财报",
+          "并购",
+          "渠道",
+          "零售",
+          "供应链",
+          "市场"
+        ]
+      }
+    },
+    {
+      "id": "36kr",
+      "name": "36氪",
+      "start_url": "https://www.36kr.com/feed",
+      "source_region": "CN",
+      "source_type": "business_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "创业",
+        "融资",
+        "消费品牌",
+        "科技"
+      ],
+      "crawl_strategy": "feed",
+      "parser_config": {
+        "discovery_method": "feed",
+        "ingest_feed_content": true,
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "香水",
+          "香氛",
+          "个护",
+          "欧莱雅",
+          "珀莱雅",
+          "雅诗兰黛"
+        ],
+        "event_keywords": [
+          "品牌",
+          "融资",
+          "财报",
+          "并购",
+          "渠道",
+          "零售",
+          "供应链",
+          "市场"
+        ]
+      }
+    },
+    {
+      "id": "jiemian_consumer",
+      "name": "界面新闻·消费",
+      "start_url": "https://www.jiemian.com/lists/31.html",
+      "source_region": "CN",
+      "source_type": "business_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "消费",
+        "品牌",
+        "零售",
+        "商业新闻"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "article_url_pattern": "^https://www\\.jiemian\\.com/article/\\d+\\.html$",
+        "max_articles": 1,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "香水",
+          "香氛",
+          "个护",
+          "欧莱雅",
+          "珀莱雅",
+          "雅诗兰黛"
+        ],
+        "event_keywords": [
+          "品牌",
+          "融资",
+          "财报",
+          "并购",
+          "渠道",
+          "零售",
+          "供应链",
+          "市场",
+          "监管"
+        ]
+      }
+    },
+    {
+      "id": "yicai",
+      "name": "第一财经",
+      "start_url": "https://www.yicai.com/news/",
+      "source_region": "CN",
+      "source_type": "business_media",
+      "default_language": "zh-CN",
+      "source_tags": [
+        "商业",
+        "消费",
+        "公司",
+        "行业新闻"
+      ],
+      "crawl_strategy": "html",
+      "parser_config": {
+        "link_selector": "a[href]",
+        "article_url_pattern": "^https://www\\.yicai\\.com/news/\\d+\\.html$",
+        "body_selector": ".m-txt",
+        "max_articles": 1,
+        "candidate_scan_limit": 20,
+        "request_delay_seconds": 0.5,
+        "access_level": "public"
+      },
+      "processing_config": {
+        "scope_mode": "keyword",
+        "industry_keywords": [
+          "美妆",
+          "化妆品",
+          "护肤",
+          "彩妆",
+          "香水",
+          "香氛",
+          "个护",
+          "欧莱雅",
+          "珀莱雅",
+          "雅诗兰黛"
+        ],
+        "event_keywords": [
+          "品牌",
+          "融资",
+          "财报",
+          "并购",
+          "渠道",
+          "零售",
+          "供应链",
+          "市场",
+          "监管"
+        ]
+      }
+    }
+  ]
+}

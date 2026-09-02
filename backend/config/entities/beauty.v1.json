@@ -1,0 +1,30 @@
+{
+  "schema_version": "entity-extraction-policy.v1",
+  "policy_key": "beauty-entities.v1",
+  "entities": [
+    {
+      "registry_key": "organization:tnt_group",
+      "entity_type": "organization",
+      "canonical_name": "TNT Group",
+      "language": "en",
+      "description": "文章中明确出现的组织名称。",
+      "aliases": []
+    },
+    {
+      "registry_key": "brand:rabanne",
+      "entity_type": "brand",
+      "canonical_name": "Rabanne",
+      "language": "en",
+      "description": "文章中明确出现的品牌名称。",
+      "aliases": []
+    },
+    {
+      "registry_key": "product:million_gold_for_her_pure_diamonds",
+      "entity_type": "product",
+      "canonical_name": "Million Gold for Her Pure Diamonds",
+      "language": "en",
+      "description": "文章中明确出现的产品名称。",
+      "aliases": []
+    }
+  ]
+}

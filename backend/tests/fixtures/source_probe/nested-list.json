@@ -1,0 +1,8 @@
+{
+  "data": {
+    "items": [
+      {"id": 1, "title": "First story", "url": "https://example.com/news/1"},
+      {"id": 2, "title": "Second story", "url": "https://example.com/news/2"}
+    ]
+  }
+}

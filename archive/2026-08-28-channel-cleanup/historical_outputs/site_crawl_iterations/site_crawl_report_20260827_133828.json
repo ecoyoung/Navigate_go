@@ -1,0 +1,47 @@
+[
+  {
+    "id": "beautymatter",
+    "name": "BeautyMatter",
+    "region": "GLOBAL",
+    "language": "en",
+    "status": "succeeded",
+    "fetched": 1,
+    "new": 0,
+    "updated": 0,
+    "skipped": 1,
+    "rejected": 0,
+    "errors": 0,
+    "error_code": null,
+    "error_summary": null
+  },
+  {
+    "id": "iresearch",
+    "name": "艾瑞咨询",
+    "region": "CN",
+    "language": "zh-CN",
+    "status": "succeeded",
+    "fetched": 1,
+    "new": 0,
+    "updated": 0,
+    "skipped": 1,
+    "rejected": 0,
+    "errors": 0,
+    "error_code": null,
+    "error_summary": null
+  },
+  {
+    "id": "36kr",
+    "name": "36氪",
+    "region": "CN",
+    "language": "zh-CN",
+    "status": "succeeded",
+    "fetched": 1,
+    "new": 0,
+    "updated": 0,
+    "skipped": 1,
+    "rejected": 0,
+    "errors": 0,
+    "error_code": null,
+    "error_summary": null
+  }
+]

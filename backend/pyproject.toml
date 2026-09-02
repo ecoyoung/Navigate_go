@@ -1,0 +1,33 @@
+[project]
+name = "navigate-backend"
+version = "0.1.0"
+description = "Navigate beauty intelligence ingestion API"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.14,<2",
+  "beautifulsoup4>=4.13,<5",
+  "fastapi>=0.116,<1",
+  "feedparser>=6.0.11,<7",
+  "httpx>=0.28,<1",
+  "lxml>=5.4,<7",
+  "python-dateutil>=2.9,<3",
+  "python-dotenv>=1.1,<2",
+  "sqlalchemy>=2.0.40,<3",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.4,<9", "pytest-asyncio>=1.0,<2", "ruff>=0.12,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]

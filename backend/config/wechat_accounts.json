@@ -1,0 +1,2210 @@
+{
+  "schema_version": "redfox-wechat-accounts.v1",
+  "accounts": [
+    {
+      "catalog_id": "wechat_redfox_36kr",
+      "name": "36氪",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_240fbf8b33e4",
+      "source_external_id": "MzI2NDk5NzA0Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_c2cc",
+      "name": "C2CC新传媒",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_d28fd3814b28",
+      "source_external_id": "MjM5MzEzMTA2MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_croda",
+      "name": "Croda禾大美护",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_91bf11b688bb",
+      "source_external_id": "MzI1NjM2OTU5MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_fbeauty",
+      "name": "FBeauty未来迹",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_ed572625041d",
+      "source_external_id": "MzkxNDMyOTk1NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_bea7fa78e46b6f1b",
+      "name": "Nint任拓",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "nintchina",
+      "source_external_id": "MzU5MjgzMTY1OA==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_provital",
+      "name": "Provital璞未",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_50c3d3371b9d",
+      "source_external_id": "MzYzNTgwNzU4Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_sagetogether",
+      "name": "SageTogether",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_1a40b5248d92",
+      "source_external_id": "MzAwNjA0MjgwMg=="
+    },
+    {
+      "catalog_id": "wechat_mp_969077e9b6f1076c",
+      "name": "everbab艾蓓拉",
+      "status": "ready",
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk0NDEyNzA1Mg==",
+      "source_external_id": "Mzk0NDEyNzA1Mg==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_imeizhuang",
+      "name": "i美妆头条",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_c1f2382ef291",
+      "source_external_id": "MzIzNzI3Nzk5OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_shanghai_jahwa",
+      "name": "上海家化",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_a597bedfcaf6",
+      "source_external_id": "MzA3NDgzNDgzOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_yaolan",
+      "name": "上海尧岚生物科技",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_10340f116cf6",
+      "source_external_id": "MzU4MjY4NzE3Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_china_cosmetics",
+      "name": "中国化妆品",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_295dad8858ef",
+      "source_external_id": "MzA4NjMwMzQyNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_china_fragrance",
+      "name": "中国香妆",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_75bb685a4470",
+      "source_external_id": "MzA5ODU5ODg0NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_caffci",
+      "name": "中国香料香精化妆品工业协会",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_239b30c7cfb8",
+      "source_external_id": "MzIyNjEyMTc1Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_yimeishang",
+      "name": "仪美尚",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_c6b8ad8aee8f",
+      "source_external_id": "MzkyMzI5NjM4NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_zhaoheng",
+      "name": "兆衡实业",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_d438e8617d11",
+      "source_external_id": "MzU2ODQ2NjkzNw=="
+    },
+    {
+      "catalog_id": "huazhuangpinbao_wechat",
+      "name": "化妆品报",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "huazhuangpinbao",
+      "source_external_id": "MzU0Mzg0MjA3MA==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_pinguan",
+      "name": "化妆品观察 品观",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_95cbbb0cae8f",
+      "source_external_id": "MzkzMjQ5MDAyMw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_bloomage",
+      "name": "华熙生物",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_036ac745df2a",
+      "source_external_id": "MjM5NzQzNjAzNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_tiansheng",
+      "name": "天晟生物科技",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_e5d2e5eef55c",
+      "source_external_id": "Mzg2MzAwMzIxNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_symrise",
+      "name": "德之馨化妆品技术与科学",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_88476ceb7758",
+      "source_external_id": "MzI5NjEzNzk0NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_pedaily",
+      "name": "投资界",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_6488c708f8ec",
+      "source_external_id": "MzI5ODk1NjY1MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_chunleishe",
+      "name": "春雷社",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_c6594884d1f2",
+      "source_external_id": "MzkxNTI3MjQ2Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_luisimu",
+      "name": "柳丝木",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "lsmfwpt",
+      "source_external_id": "MzI5OTAyNDA0OA==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_loreal_news",
+      "name": "欧莱雅中国资讯中心",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_5b487e9bbc24",
+      "source_external_id": "MzAwNzc1MTg4MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_petersons_lab",
+      "name": "毕生之研",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "petersonslab",
+      "source_external_id": "MzUzNDAzNDI1Ng==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_mgp",
+      "name": "毛戈平MGP",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "MGPBEAUTY",
+      "source_external_id": "MzAwMDU5NzI2NQ==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_paidai",
+      "name": "派代",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_5d016cd84eca",
+      "source_external_id": "MzkxNjM5MTU1Mg=="
+    },
+    {
+      "catalog_id": "wechat_mp_2f3e47fc5265d8d1",
+      "name": "炼丹炉电商情报",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "liandanludata",
+      "source_external_id": "MzkyNDQxNDgxOQ==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_proya",
+      "name": "珀莱雅PROYA",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "proyamb",
+      "source_external_id": "MzA5MzMxOTYwOA==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_proya_corp",
+      "name": "珀莱雅股份",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_1ef4e7f3b045",
+      "source_external_id": "MzA3NjE2NjkxMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_jiakai",
+      "name": "珈凯生物",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_054becd6f5d4",
+      "source_external_id": "MzI4NDk0NDI3Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_reach24h",
+      "name": "瑞旭集团",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_b5ddd862bed8",
+      "source_external_id": "MjM5OTAxMjIzMQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_yonghushuo",
+      "name": "用户说了",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_0fc4a78be4b7",
+      "source_external_id": "MzU3MTM3MzkxNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_baohau",
+      "name": "百好博致美堂",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_c36e39957f65",
+      "source_external_id": "MzI4NjM4MjE2NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_shengde",
+      "name": "盛德百泰生物科技",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_49a3ab2d941e",
+      "source_external_id": "Mzg5NjgxMTQwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_winkey",
+      "name": "维琪WINKEY",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_b20abd30e59b",
+      "source_external_id": "Mzg5OTE0NjU3Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_f149c9e29b6b6eb6",
+      "name": "美业颜究院",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "meiyeyanjiu",
+      "source_external_id": "MzIzMzA5MDE3Nw==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_redfox_compliance",
+      "name": "美妆品牌合规指引",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_a804b3f815fa",
+      "source_external_id": "MzkxMTIzNjc0Ng=="
+    },
+    {
+      "catalog_id": "wechat_redfox_yuanzhoulv",
+      "name": "美妆商业评论 圆周率",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_437bc6608db2",
+      "source_external_id": "Mzk3NTA0Mjc1MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_meizhuangwang",
+      "name": "美妆网",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_ab807f0a5b0d",
+      "source_external_id": "MjM5MTc4NjA4MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_cbeauty",
+      "name": "美浪CBEAUTY",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_b23c2b6f295a",
+      "source_external_id": "Mzk0NzUyNDcwOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_jumeili",
+      "name": "聚美丽",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_c1cf77fd0a0e",
+      "source_external_id": "MzI0OTg1NTUxOA=="
+    },
+    {
+      "catalog_id": "wechat_mp_30bf6c905220068f",
+      "name": "自然堂集团",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "jala_chando",
+      "source_external_id": "MjM5NjI1MTY0MQ==",
+      "is_enabled": false,
+      "aliases": [
+        "自然堂"
+      ]
+    },
+    {
+      "catalog_id": "wechat_mp_96f55b0197c6bf9d",
+      "name": "花西子Florasis",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "huaxizi_florasis",
+      "source_external_id": "MzU1MDE4NjU1OQ==",
+      "is_enabled": false,
+      "aliases": [
+        "花西子 Florasis"
+      ]
+    },
+    {
+      "catalog_id": "wechat_redfox_yanantang",
+      "name": "言安堂",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_3204d153d74a",
+      "source_external_id": "MzA5Mzg3MjAyOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_botanee",
+      "name": "贝泰妮集团",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_e410af251469",
+      "source_external_id": "MzkxNDQ1MDcxMw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_safechem",
+      "name": "赛福化工",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_4098d1133cca",
+      "source_external_id": "Mzg4NzU2NjU3NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_zhiben",
+      "name": "逐本生活家",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "bestnowever",
+      "source_external_id": "MzAwNDk5NzQzMA==",
+      "is_enabled": false
+    },
+    {
+      "catalog_id": "wechat_mp_d9b45618c92d722a",
+      "name": "青眼",
+      "status": "ready",
+      "selector_kind": "account",
+      "selector_value": "whqyqb",
+      "source_external_id": "MzY5NDA2MzMyMQ==",
+      "is_enabled": false,
+      "aliases": [
+        "青眼情报"
+      ]
+    },
+    {
+      "catalog_id": "wechat_redfox_mojing",
+      "name": "魔镜洞察",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "wxId",
+      "selector_value": "gh_099bac712d94",
+      "source_external_id": "MzkxMzMxOTQ2MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_525f9c803b94",
+      "name": "KIMTRUE且初",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kimtrue66",
+      "source_external_id": "Mzg3NjU0MTkyMw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c79ab670b767",
+      "name": "ddg滴滴肌密",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwMjIwMTkxNg==",
+      "source_external_id": "MzkwMjIwMTkxNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_4320cfac46cd",
+      "name": "ONCUR安修泽",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg4NTcyMTg4Nw==",
+      "source_external_id": "Mzg4NTcyMTg4Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_98714562cfb7",
+      "name": "Aucuz奥札",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2MzgyMjg4NQ==",
+      "source_external_id": "Mzg2MzgyMjg4NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a7716006ab71",
+      "name": "3odice三蒂丝",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkyMjY5Mjc1Ng==",
+      "source_external_id": "MzkyMjY5Mjc1Ng=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_dafbc15756fb",
+      "name": "兰蔻LANCOME",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "LANCOME_CHINA",
+      "source_external_id": "MjM5NzAwMTc0Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a926145f2d16",
+      "name": "LAMER海蓝之谜",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "LA_MER_China",
+      "source_external_id": "MjM5NTUxMTUwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f9fa3b40a336",
+      "name": "HR赫莲娜官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "helenarubinstein_CN",
+      "source_external_id": "MjM5OTE4OTAxNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_e26bc383080d",
+      "name": "SK-II",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "SK-IICN",
+      "source_external_id": "MzA4MjI1MzExNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0cc1102d868b",
+      "name": "修丽可整全PRO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "skinceuticalspro",
+      "source_external_id": "MzkyNTM3MTY4MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f0f6523951ad",
+      "name": "修丽可SkinCeuticals",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "SkinCeuticalsChina",
+      "source_external_id": "MzA4MTY3NzUwMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_3bee1ab9202db2a6",
+      "name": "OLAY",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "olaypg",
+      "source_external_id": "MjM5OTQwMzU4MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_cf72b7e172b8",
+      "name": "CLARINS法国娇韵诗",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ClubClarins",
+      "source_external_id": "MzA4ODg2MDAwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_7cb096639ade",
+      "name": "林清轩山茶花护肤",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Linqingxuan-SH",
+      "source_external_id": "MjM5NTczODU0MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b25ff4f468c5",
+      "name": "THE WHOO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "TheHistoryOf_whoo",
+      "source_external_id": "MzA4NzQ0MzU4Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_8eef10be996a",
+      "name": "SHISEIDO资生堂",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzA5MjI4MzIxOA==",
+      "source_external_id": "MzA5MjI4MzIxOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0e1704a1f864",
+      "name": "科颜氏Kiehls",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kiehlschina",
+      "source_external_id": "MzA5MzI3ODczMg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_445e1d982afb",
+      "name": "法国科兰黎Galenic",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "GalenicParis",
+      "source_external_id": "MzkyMjIxMDU1OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c034fa02439b",
+      "name": "欧诗漫美如珍珠",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "OSMUN_1967",
+      "source_external_id": "MjM5NzAxMTgyMg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b1a227a8fb46",
+      "name": "CPB肌肤之钥",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "CPB_China",
+      "source_external_id": "MzA5MzUxMzgxNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_9135c8dbb10a",
+      "name": "雅诗兰黛",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "EL_China",
+      "source_external_id": "MjM5ODgwNzAwNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1ff22ad94759",
+      "name": "MARUBI丸美",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "marubi_wanmei",
+      "source_external_id": "Mzg5MzUwODY0NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6bf7b33fcf79",
+      "name": "植村秀",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "shu_China",
+      "source_external_id": "MjM5ODcwODA4MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_13392cc69a82",
+      "name": "freeplus芙丽芳丝",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kanebo_freeplus",
+      "source_external_id": "MjM5NzkxMzU1Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_62588e4c47ba",
+      "name": "Maybelline 美宝莲纽约",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Maybellineweixin",
+      "source_external_id": "MjM5MDA5NjEwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b0ec306e5131",
+      "name": "法国贝德玛",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "BIODERMACHINA",
+      "source_external_id": "MjM5NjI4MDkwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1da469fd9cc9",
+      "name": "BobbiBrown芭比波朗",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "bobbibrowncn",
+      "source_external_id": "MjM5NzY0MTc2MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_ec84692f2249",
+      "name": "芭妮兰BANILACO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "banilaco6",
+      "source_external_id": "MzA3ODI4NTQzMg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b1ff974c4439",
+      "name": "Curel珂润",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Curelchina",
+      "source_external_id": "Mzg2NDY1NjAzNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_39134bc314bc",
+      "name": "EVELOM伊芙珑",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg5NjA1ODU5Mw==",
+      "source_external_id": "Mzg5NjA1ODU5Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1dc9cb33d1d0",
+      "name": "CeraVe适乐肤",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "CeraVe_China",
+      "source_external_id": "MzU1NjYzNDIzNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_5df19c6c257d",
+      "name": "BUV笔薇",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzY4ODM1NDE4MQ==",
+      "source_external_id": "MzY4ODM1NDE4MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_85c7ab7182c9",
+      "name": "如薇RNW",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwOTIyOTYxOA==",
+      "source_external_id": "MzkwOTIyOTYxOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_22fce4ef0c0d",
+      "name": "eLL品牌官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk2NDgyNjM4Mw==",
+      "source_external_id": "Mzk2NDgyNjM4Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6881fbc062a9",
+      "name": "POLA",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "POLA_shanghai",
+      "source_external_id": "MzA4NzA1MDcyMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_4e41cf3d8830",
+      "name": "YSL圣罗兰美妆",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "yslbeauty",
+      "source_external_id": "MjM5MDA5Mjc4OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_46bf711084bf",
+      "name": "DIROVO蒂洛薇",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Dirovo888",
+      "source_external_id": "MzkzNTUzMTI1Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_fe7af00d218c",
+      "name": "卡姿兰Carslan",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg3Nzc0MjQwOA==",
+      "source_external_id": "Mzg3Nzc0MjQwOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_e71f587d1ac4",
+      "name": "柏瑞美PRAMY",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2MDc1OTgzNg==",
+      "source_external_id": "Mzg2MDc1OTgzNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0a5431d87d85",
+      "name": "三资堂CENSTO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkxMDU5NzY1Mw==",
+      "source_external_id": "MzkxMDU5NzY1Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0a0b8b0a9633",
+      "name": "DPDP纯净彩妆",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk2NDgyNzU2Mw==",
+      "source_external_id": "Mzk2NDgyNzU2Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_779704c7ffd6",
+      "name": "NARS",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "NARSChina",
+      "source_external_id": "MzU5OTAyODc2OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f275fe6855c7",
+      "name": "FLOWER LURE 花间颂",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkxMzY4NzYyNQ==",
+      "source_external_id": "MzkxMzY4NzYyNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_d24fc06abeea",
+      "name": "修可芙SOCORSKIN",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkzMzYzNTk0OQ==",
+      "source_external_id": "MzkzMzYzNTk0OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_9ec29f8ef32a",
+      "name": "3CE STYLENANDA官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU0Nzk4NTg3NQ==",
+      "source_external_id": "MzU0Nzk4NTg3NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_913ef22986c9960f",
+      "name": "Colorkey珂拉琪",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Color_Key",
+      "source_external_id": "MzU4MTQ2ODYzNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_cdcd5481c208",
+      "name": "施华蔻美发世家",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "schwarzkopf_fans",
+      "source_external_id": "MzA4NzM3MTMyOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f593a490dc6c",
+      "name": "香奈儿CHANEL",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "chanelofficial",
+      "source_external_id": "MzU3NTgxMjA1Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_56948dcb5c76",
+      "name": "DIOR迪奥",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Dior_Official",
+      "source_external_id": "MjM5NzIxODQwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_d8ae3b1e2f73",
+      "name": "阿玛尼ArmaniBeauty",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ARMANI__BEAUTY",
+      "source_external_id": "MzA3MDcxMzQwNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_dcc927f4c384",
+      "name": "TOMFORDBEAUTY",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU2Mzg3MDMzOA==",
+      "source_external_id": "MzU2Mzg3MDMzOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_29207d5fffab",
+      "name": "PASSIONAL LOVER的情绪树洞",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg5NjYwMDg1NA==",
+      "source_external_id": "Mzg5NjYwMDg1NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a41b79184d2d",
+      "name": "卡唯朵KAWEIDUO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzYyNDQ4NzQyOQ==",
+      "source_external_id": "MzYyNDQ4NzQyOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1a27ccf7c2ef",
+      "name": "凡士林VASELINE",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzIxNjUxNjg0OQ==",
+      "source_external_id": "MzIxNjUxNjg0OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_744b1d9e4891",
+      "name": "宝玑米PULJIM",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "puljim2021",
+      "source_external_id": "MzU3MzAzNjUyMQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_01136ce76e7509ac",
+      "name": "高缇雅官方号",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "GOTDYA_CARE",
+      "source_external_id": "MzkyOTMyMzg0Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_e693c0a1331948f8",
+      "name": "养元青",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU4NzMxNjcxMQ==",
+      "source_external_id": "MzU4NzMxNjcxMQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_217d4e3fa97fdcf9",
+      "name": "EHD品牌",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwMDQwMjE4Nw==",
+      "source_external_id": "MzkwMDQwMjE4Nw=="
+    },
+    {
+      "catalog_id": "wechat_mp_6d8999ce29d9cc8b",
+      "name": "佳丽仟丝发研社",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzY5MzIxOTAxNg==",
+      "source_external_id": "MzY5MzIxOTAxNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_3a5a8823a7d4",
+      "name": "OKCS在家染发",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwMTY0MTc5NA==",
+      "source_external_id": "MzkwMTY0MTc5NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_9cc21492ceb4",
+      "name": "freiol福来",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU3NDkwODYzOA==",
+      "source_external_id": "MzU3NDkwODYzOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_2d99a3d372c0",
+      "name": "伊丽莎白雅顿",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "RedDoorArden",
+      "source_external_id": "MjM5NTU4ODEwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_950e9f78cba8",
+      "name": "普罗旺斯欧舒丹",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "LOCCITANE_PROVENCE",
+      "source_external_id": "MjM5ODE0NDAwMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_d157e8960cd4f28c",
+      "name": "Krauterhof | 七叶庄园",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "LeadingC88",
+      "source_external_id": "Mzg2NDczODgyMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_787955af69d4",
+      "name": "VictoriasSecret维多利亚的秘密",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "VS_Official",
+      "source_external_id": "MzI4MDQzNTY0OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1c121a200f7f",
+      "name": "妮维雅NIVEA",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "NIVEA-China",
+      "source_external_id": "MzA4OTM1MzMxNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_4fb3165724fa",
+      "name": "Nougat敦集",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkzOTMyMDkxNw==",
+      "source_external_id": "MzkzOTMyMDkxNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_d481cdf2ef6e",
+      "name": "乎刻HUKO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "HUKO2022",
+      "source_external_id": "Mzg4Mzg3NjA0NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_aeb160b8133b",
+      "name": "CHARM NOTES颂境",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk0ODQ0NjM3NQ==",
+      "source_external_id": "Mzk0ODQ0NjM3NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_4680edd65637cce3",
+      "name": "浴见BATHFEEL",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "bathfeeling2015",
+      "source_external_id": "MzE5OTE0MTk1MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_32f24b1401f2",
+      "name": "Lux力士",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "unileverlux",
+      "source_external_id": "MjM5NzUxMzcwMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_86f7b70e95d2",
+      "name": "Dove 多芬",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "dovebeautycenter",
+      "source_external_id": "MzI2MDQyMjA2Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_fb6305e41172",
+      "name": "玉泽Dr.Yu",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "DrYu-yuze",
+      "source_external_id": "MzkwMDI4OTk3NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c62895dd4678",
+      "name": "fresh馥蕾诗",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "fresh-cn",
+      "source_external_id": "MzA3NjE0MzIwMw=="
+    },
+    {
+      "catalog_id": "wechat_mp_458eaa9a799f2248",
+      "name": "温碧泉",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "wetherm2016",
+      "source_external_id": "MzIzMzYyNDA2NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_cb9c3f909767",
+      "name": "佰草集Herborist",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "HerboristBCJ",
+      "source_external_id": "MjM5MDI1MzE1MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_75cf512966105a80",
+      "name": "曼秀雷敦",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Mentholatum_China",
+      "source_external_id": "MjM5ODAxMjY2Ng=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6caf3e2bc727",
+      "name": "Uriage依泉",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk0MzQ5MzY1MQ==",
+      "source_external_id": "Mzk0MzQ5MzY1MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_55990760b2180c68",
+      "name": "三世SANSHI",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "xy16606332338",
+      "source_external_id": "Mzg5MjcyOTgyMw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1d2db80b8714",
+      "name": "舒肤佳Safeguard",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "SafeguardChina",
+      "source_external_id": "MjM5NDAzMjQ2Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_86e21aaaa8e3",
+      "name": "红卫皂业官方号",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwMDcxMDUxNA==",
+      "source_external_id": "MzkwMDcxMDUxNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c0cd860ab527",
+      "name": "六神",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ilovesixgod",
+      "source_external_id": "MzA4Njg0MTg5Ng=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_537075e38ebd",
+      "name": "海洋至尊ZSEA",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "HaiYangZhiZunZSEA",
+      "source_external_id": "MzcxMDAzOTUxOA=="
+    },
+    {
+      "catalog_id": "wechat_mp_1bb65599d42e90ee",
+      "name": "法国CLINSIS",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ClinsisParis",
+      "source_external_id": "Mzg2MDg4MzA1OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_05e1975c0373",
+      "name": "SABON Official",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "SabonOfficial",
+      "source_external_id": "Mzg5MzM0NDQzNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_e7db2137a511",
+      "name": "威露士",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "walchxdk",
+      "source_external_id": "MzA5ODYwMjM3Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_3e8f633fec60",
+      "name": "Kustie蔻斯汀",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Kustie_China",
+      "source_external_id": "MzI2MTAxMDA0Ng=="
+    },
+    {
+      "catalog_id": "wechat_mp_2c76b77e6ee1c64a",
+      "name": "Vetes维特丝",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk2OTA1MzAyNw==",
+      "source_external_id": "Mzk2OTA1MzAyNw=="
+    },
+    {
+      "catalog_id": "wechat_mp_27311777e0dfeddb",
+      "name": "韩方五谷",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzUzMTc2OTg2OQ==",
+      "source_external_id": "MzUzMTc2OTg2OQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_279dedee46349899",
+      "name": "花知晓Flower Knows",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "flowerknowsfwuh",
+      "source_external_id": "MzkwMjIwMjIxNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_73af96c416c1",
+      "name": "Judydoll橘朵",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzIwOTM0MTAxNQ==",
+      "source_external_id": "MzIwOTM0MTAxNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_5a401ab49734",
+      "name": "JOOCYEE酵色",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Joocyee-",
+      "source_external_id": "Mzg3MDY0NTMwNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a24f7d82fb29",
+      "name": "至本ZHIBEN",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "zhibenofficial",
+      "source_external_id": "MzYyNDE0NDE4NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6c0fd642e849",
+      "name": "彩棠TIMAGE",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "caitangtimage",
+      "source_external_id": "MzIyMjgwNzk5NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_54e702f08b2d",
+      "name": "OffRelax",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg5MTgwMTQxNA==",
+      "source_external_id": "Mzg5MTgwMTQxNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_fc134d4bc5ad",
+      "name": "Hipapa海龟爸爸",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "hipapa007",
+      "source_external_id": "Mzg2NTMwNDM1NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_450077525d3e",
+      "name": "尔木萄AMORTALS 2014",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "AMORTALS_2014",
+      "source_external_id": "Mzg3ODE0Njc3Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_729ddeb6c7cd",
+      "name": "INTOYOU心慕与你",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "intoyouintomore",
+      "source_external_id": "MzI1NzY1MDExOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_8b464576a4f6",
+      "name": "Dearlrean独特艾琳",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg4Mjg5ODYxOQ==",
+      "source_external_id": "Mzg4Mjg5ODYxOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_aa43a349023d",
+      "name": "FLORTTE花洛莉亚",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwNzI2NDMxMA==",
+      "source_external_id": "MzkwNzI2NDMxMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_9764d62b6571",
+      "name": "REDCHAMBER朱栈",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg5MDUzMzMxOA==",
+      "source_external_id": "Mzg5MDUzMzMxOA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6b1249b425f2",
+      "name": "KATO-KATO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzIzNzM4NzE3OQ==",
+      "source_external_id": "MzIzNzM4NzE3OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_7ed9390dda95",
+      "name": "BABI官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkzNjUyMjA3Mg==",
+      "source_external_id": "MzkzNjUyMjA3Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_10735bea3dfa",
+      "name": "红之HUNGCHI",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "HungChi-HZ",
+      "source_external_id": "Mzk0NTE5MjIyNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_583bbfe1ca10",
+      "name": "达肤妍DrDH",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkyNTQzMTA0MQ==",
+      "source_external_id": "MzkyNTQzMTA0MQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c9bd1292c094",
+      "name": "INSBAHA原色波塔",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "INSBAHA",
+      "source_external_id": "MzI5NTY3NTcyMA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_cac6e24cd33e",
+      "name": "Fan Beauty Diary",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "FanBeautySecret916",
+      "source_external_id": "MzkyNTIzOTQ0OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f8a7ad400428",
+      "name": "卡诗Kerastase",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kerastasechina",
+      "source_external_id": "MjM5NzM2NDAwNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_d387f73f26bd",
+      "name": "馥绿德雅RENEFURTERER",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkxMTYxNDc2NA==",
+      "source_external_id": "MzkxMTYxNDc2NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1f05f5dd068b",
+      "name": "ficcecode菲诗蔻",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzY5MzExMDE2Mw==",
+      "source_external_id": "MzY5MzExMDE2Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_29a3b6d758b1604b",
+      "name": "潘婷",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Love-Pantene",
+      "source_external_id": "MjM5NjQ0NTE5Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_36fded97fcaf",
+      "name": "半亩花田官方号",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "bmhthyfw",
+      "source_external_id": "MzAwODc4NTk1Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1f0d6c291dfc",
+      "name": "Spes诗裴丝",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Spes_China",
+      "source_external_id": "MzI5MjUwNTM5Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_fe7e649fed6e",
+      "name": "Roye若也",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "RoyeAAAA",
+      "source_external_id": "Mzk0NDQxNjA5OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_5b884f73e1d6",
+      "name": "摇滚动物园ROCKINGZOO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "RockingZoo",
+      "source_external_id": "MzA5MjE3ODk0Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a25ec8405f8e",
+      "name": "LAN兰官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2MDY2NDE1MA==",
+      "source_external_id": "Mzg2MDY2NDE1MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_86809fb1e28f",
+      "name": "馥郁满铺",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzI3NTUyMjI1NQ==",
+      "source_external_id": "MzI3NTUyMjI1NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_ce483ef0150f",
+      "name": "DR.WU达尔肤",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2NjU2NTc2Ng==",
+      "source_external_id": "Mzg2NjU2NTc2Ng=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_32b11238a8ef",
+      "name": "C咖油皮护肤",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2NDcxMDc4Nw==",
+      "source_external_id": "Mzg2NDcxMDc4Nw=="
+    },
+    {
+      "catalog_id": "wechat_mp_24339bf092551fb2",
+      "name": "羽素YOU&PURE",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg2MDE2ODE4OA==",
+      "source_external_id": "Mzg2MDE2ODE4OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_efb442d2fc4b",
+      "name": "译龄Cell Grrshula",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwNzQxNzQ0Nw==",
+      "source_external_id": "MzkwNzQxNzQ0Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_5920b97d3610",
+      "name": "可复美",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kefumei_official",
+      "source_external_id": "MzIwOTUwMzAwNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_75bef94b0ad3",
+      "name": "安敏优ARMIYO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk0MDMyNzE3Nw==",
+      "source_external_id": "Mzk0MDMyNzE3Nw=="
+    },
+    {
+      "catalog_id": "wechat_mp_5c56fef71067ab1e",
+      "name": "Girlcult构奇",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "girlcult_camp",
+      "source_external_id": "MzIxMzAyOTgxNg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_cf0af1844286",
+      "name": "理肤泉LaRochePosay",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "larocheposay1975",
+      "source_external_id": "MjM5ODM0MTMyMg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6861e7cad57b",
+      "name": "MISTINE蜜丝婷",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Mistine-BetterWay",
+      "source_external_id": "MzIxMDM4MjM4MA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b2676306c95c",
+      "name": "观夏tosummer",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "summerlab1",
+      "source_external_id": "Mzg5NDAyMTMxNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_30f02c4039f4",
+      "name": "闻献DOCUMENTS",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "DOCUMENTSCHINA",
+      "source_external_id": "Mzk0NDMxNjU5OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_5db3beca3aca",
+      "name": "绽妍JUYOU",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzI3NzAxODcwNQ==",
+      "source_external_id": "MzI3NzAxODcwNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b15b5fecf410",
+      "name": "AMIRO觅光",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "AccompanyTech",
+      "source_external_id": "MzIxODE1MDU0NQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0948188bb87e",
+      "name": "薇姿VICHY官方账号",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Vichymember",
+      "source_external_id": "MzA5NTU1MDgzNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_6b6f03d085a9",
+      "name": "蜂花",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzI4NTAzNDE5Nw==",
+      "source_external_id": "MzI4NTAzNDE5Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_7acd952f8a18",
+      "name": "欧莱雅美丽殿堂",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "LOR_PARIS",
+      "source_external_id": "MzA3MzA3ODYxNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_1baff831aa8d",
+      "name": "惊时 Awaken Seeds",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkxODY2NzkyOQ==",
+      "source_external_id": "MzkxODY2NzkyOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_bccb29dabeef",
+      "name": "肌漾SKINO",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU1NzY3MDY0Mg==",
+      "source_external_id": "MzU1NzY3MDY0Mg=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b084900a76cd",
+      "name": "薇诺娜WINONA",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "drwinona",
+      "source_external_id": "MjM5MzMwNzE3Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_c42a7b30b188",
+      "name": "韩束 KANS",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Kans2002",
+      "source_external_id": "MzU3NTg4OTk5NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_bd1fd1520deea0e7",
+      "name": "谷雨GUYU品牌",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "guyu-hufu",
+      "source_external_id": "MzAxMDk1ODA0MA=="
+    },
+    {
+      "catalog_id": "wechat_mp_8529cae308a707ab",
+      "name": "HBN颜究所",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "hi-HBN",
+      "source_external_id": "Mzg3MzA2NTQ2OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_8d719a273bad",
+      "name": "QUADHA丨夸迪",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "kuadi1314",
+      "source_external_id": "MzU5ODYwNTU2Mw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_271faf83bdd3",
+      "name": "blankme半分一",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "BlankMEofficial",
+      "source_external_id": "MzI2NDY1NTQ4OA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_781711fc7eb0",
+      "name": "PMPM偏偏",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "heyPMPM",
+      "source_external_id": "MzUyNDEyNjc3NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_ae36c6daa75affbc",
+      "name": "VPIOfficial",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Vposy-839576274",
+      "source_external_id": "MzIyNjU2NzIxNQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_65eda1292ba7",
+      "name": "施巴sebamed",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkzNTU3MjM2Nw==",
+      "source_external_id": "MzkzNTU3MjM2Nw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_f6bdf66c9298",
+      "name": "ZEESEA滋色",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzk1Nzg0Njk4Mg==",
+      "source_external_id": "Mzk1Nzg0Njk4Mg=="
+    },
+    {
+      "catalog_id": "wechat_mp_889662400715a5b0",
+      "name": "尼尔森IQ",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "NielsenIQ_China",
+      "source_external_id": "MzI2OTAxNjQ4OQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_314647a753ba",
+      "name": "益普索Ipsos",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ipsos_research",
+      "source_external_id": "MjM5Mzg5Nzk1MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_ac3cddb8f8187a11",
+      "name": "BCG波士顿咨询",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "BCG_Greater_China",
+      "source_external_id": "MzAxMjE3NTYzMg=="
+    },
+    {
+      "catalog_id": "wechat_mp_bec437fd89c1b601",
+      "name": "Mintel英敏特",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "MINTEL_CHINA",
+      "source_external_id": "MjM5NTgyNzI5MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_5251e7c31c645d5c",
+      "name": "凯度KANTAR",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "KantarGroup",
+      "source_external_id": "MzI1MTQ1MTQ2MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_2e651cfa37a9ac20",
+      "name": "麦肯锡",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "mckinsey_gco",
+      "source_external_id": "MzA4MDUzOTIxNA=="
+    },
+    {
+      "catalog_id": "wechat_mp_5a385737c8b398c4",
+      "name": "罗兰贝格管理咨询",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "roland_berger",
+      "source_external_id": "MjM5MzkwMzg3MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_a86aadca50436474",
+      "name": "弗若斯特沙利文",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "FrostandSullivan",
+      "source_external_id": "MzIzMjI1Njc3NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_6471867680160201",
+      "name": "贝恩公司",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "bain_and_company",
+      "source_external_id": "MzAxNzAxNjg2Nw=="
+    },
+    {
+      "catalog_id": "wechat_mp_15d374f528f756a4",
+      "name": "埃森哲中国",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "accenture_china",
+      "source_external_id": "MzA4NjIyNjIxMw=="
+    },
+    {
+      "catalog_id": "wechat_mp_11f667752be297f6",
+      "name": "IBM中国",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "ibmcloud",
+      "source_external_id": "MjM5Mjk1MjgyMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_bd0bc4ffa5940b3c",
+      "name": "科尔尼管理咨询",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "KearneyChina",
+      "source_external_id": "MzA4ODg4MjcxMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_54e0efd8e49d8d7b",
+      "name": "Gartner公司",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "GartnerChina",
+      "source_external_id": "MzA5NjQyNjMxNA=="
+    },
+    {
+      "catalog_id": "wechat_mp_d6fb3885ab3d7561",
+      "name": "数说故事",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "DataStory2015",
+      "source_external_id": "MzA5ODM4NjM3OQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_9ea8c3aaa5a091ed",
+      "name": "TMIC洞察",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkzNzk2MzcyNw==",
+      "source_external_id": "MzkzNzk2MzcyNw=="
+    },
+    {
+      "catalog_id": "wechat_mp_9b5716cb9424dd64",
+      "name": "第一财经商业数据中心",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "CBNData",
+      "source_external_id": "MzA3Nzk0OTM2OA=="
+    },
+    {
+      "catalog_id": "wechat_mp_0f367f155c7c09c0",
+      "name": "星图数据",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "syntun",
+      "source_external_id": "MzA5NTEzMTYxMQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_0c7bf344dc5f1502",
+      "name": "飞瓜数据",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "feiguashujudy",
+      "source_external_id": "MzU1NzY3NDU3MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_2bd20a0ab44d6385",
+      "name": "果集",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "guojipro",
+      "source_external_id": "MzkyNTM5NzMwMg=="
+    },
+    {
+      "catalog_id": "wechat_mp_a4f12677a8fd0047",
+      "name": "千瓜",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "qiangua-saas",
+      "source_external_id": "Mzg2MzIxMTc2Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_86b6259dd1d887be",
+      "name": "久谦中台 消费",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "zhanwai_",
+      "source_external_id": "Mzg2MjEyMDk0Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_7815e3b05a68d60c",
+      "name": "蝉魔方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkyMjQwNzgxMw==",
+      "source_external_id": "MzkyMjQwNzgxMw=="
+    },
+    {
+      "catalog_id": "wechat_mp_2b59d0aa812b5339",
+      "name": "艾媒咨询",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "iiMediaResearch",
+      "source_external_id": "MzE5MTE0MzM4MQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_ce4b3a9fc11be190",
+      "name": "美妆产品观",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzU2NzE0ODU0OA==",
+      "source_external_id": "MzU2NzE0ODU0OA=="
+    },
+    {
+      "catalog_id": "wechat_mp_d7e9c5a72b2ae4a1",
+      "name": "BeautyINC 美妆观察",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "BeautyIncChina",
+      "source_external_id": "MzU1Njk2OTgzOQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_07f2191fba522313",
+      "name": "360化妆品网",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "gd360xh",
+      "source_external_id": "MjM5NjE2NzM0MA=="
+    },
+    {
+      "catalog_id": "wechat_mp_09212af8f6857e3f",
+      "name": "化妆品财经在线",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "cbonews",
+      "source_external_id": "MzU0NjgwNjMyOQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_eb1d0633d0033f88",
+      "name": "根号C",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "sqr-cosmetics",
+      "source_external_id": "MzUwOTgxMzQxNg=="
+    },
+    {
+      "catalog_id": "wechat_mp_e7b29359999f7a71",
+      "name": "美丽修行大数据",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "BEBD007",
+      "source_external_id": "MzI2MjA3MzU2NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_3b5267be94d6fd45",
+      "name": "美妆内行人 Beauty Insider",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "mznhr2023",
+      "source_external_id": "Mzk0OTcwNzc0Mw=="
+    },
+    {
+      "catalog_id": "wechat_mp_749dde06f281fa24",
+      "name": "荣格个人护理",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "HappiChina",
+      "source_external_id": "MzU5MzYyNDgyNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_a6cb84379052",
+      "name": "PANTONE色彩",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Pantone_Official",
+      "source_external_id": "MzI0NjgyMzgxNw=="
+    },
+    {
+      "catalog_id": "wechat_mp_480a44f7e3cfd0d4",
+      "name": "WGSNChina",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "wgsn_china",
+      "source_external_id": "MzI4Mjk2NjY5NA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_0dcb21e7114a",
+      "name": "BEAUTYSTREAMS",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "Mzg5NTUyNDMxMA==",
+      "source_external_id": "Mzg5NTUyNDMxMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_a40b1867afe0026d",
+      "name": "PROMOSTYL",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwOTQxMTI1Mg==",
+      "source_external_id": "MzkwOTQxMTI1Mg=="
+    },
+    {
+      "catalog_id": "wechat_mp_f8cf3a27476e7003",
+      "name": "PeclersParis",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "PeclersParis",
+      "source_external_id": "MzA4OTUzNDIwMQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_8973d314ff84d330",
+      "name": "NellyRodi官方",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "nellyrodichina",
+      "source_external_id": "MjM5NjE1MTEwNw=="
+    },
+    {
+      "catalog_id": "wechat_mp_8212b071b2bb3c39",
+      "name": "CBE美容博览会",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "chinabeautyexpo",
+      "source_external_id": "MjM5ODUxNzc1Mg=="
+    },
+    {
+      "catalog_id": "wechat_mp_2a61fa6a6573ed05",
+      "name": "CIBE美妆供应链",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "CIBE_MG",
+      "source_external_id": "MzkwNjc2MDAxNA=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_b50a82513652",
+      "name": "intercos 莹特丽",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkyMjY0Mzc1NA==",
+      "source_external_id": "MzkyMjY0Mzc1NA=="
+    },
+    {
+      "catalog_id": "wechat_mp_acda58ed61e33b57",
+      "name": "COSMAX科丝美诗",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "cosmaxchina",
+      "source_external_id": "MzA4MDk0ODYzOA=="
+    },
+    {
+      "catalog_id": "wechat_mp_16cfd837929957ee",
+      "name": "诺斯贝尔",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "zsnbc88",
+      "source_external_id": "MjM5MjE4MjgxNw=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_bd90e6f1ccee",
+      "name": "蔻诗曼嘉中国COSMECCA",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "cosmecca_china",
+      "source_external_id": "MzkxMTcyNTgxOA=="
+    },
+    {
+      "catalog_id": "wechat_mp_39dac1eb5fff2499",
+      "name": "无锡科玛 化妆品ODM",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "Kolmar-Wuxi",
+      "source_external_id": "MzA4NjQ2NDM0NQ=="
+    },
+    {
+      "catalog_id": "wechat_mp_cb25de0a0d55fdb1",
+      "name": "Sheencolor珠海神采",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "SheencolorGroup",
+      "source_external_id": "Mzg3MjUyOTAzOQ=="
+    },
+    {
+      "catalog_id": "wechat_redfox_legacy_470f2938a2e9",
+      "name": "美丽娇时",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "bizInfo",
+      "selector_value": "MzkwMjY1NzAyMA==",
+      "source_external_id": "MzkwMjY1NzAyMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_e251ba2310ef7c64",
+      "name": "芭薇股份",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "bwzs168",
+      "source_external_id": "MjM5MTA2NjExMA=="
+    },
+    {
+      "catalog_id": "wechat_mp_62ab5303cb0cd767",
+      "name": "丽彦妆",
+      "status": "ready",
+      "is_enabled": false,
+      "selector_kind": "account",
+      "selector_value": "liyanzhuang8888",
+      "source_external_id": "MzI2NjE1NTIyNQ=="
+    }
+  ]
+}

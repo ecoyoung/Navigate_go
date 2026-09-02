@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example News</title>
+    <link>https://example.com/</link>
+    <item>
+      <guid>story-1</guid>
+      <title>First story</title>
+      <link>https://example.com/news/first-story</link>
+      <description>A short summary.</description>
+      <content:encoded xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        This is a deliberately long full feed body. This is a deliberately long full
+        feed body. This is a deliberately long full feed body. This is a deliberately
+        long full feed body. This is a deliberately long full feed body. This is a
+        deliberately long full feed body. This is a deliberately long full feed body.
+        This is a deliberately long full feed body. This is a deliberately long full
+        feed body. This is a deliberately long full feed body. This is a deliberately
+        long full feed body. This is a deliberately long full feed body.
+      </content:encoded>
+    </item>
+  </channel>
+</rss>

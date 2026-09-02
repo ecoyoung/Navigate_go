@@ -1,0 +1,17 @@
+[
+  {
+    "id": "premium_beauty_news",
+    "name": "Premium Beauty News",
+    "region": "EU",
+    "language": "en",
+    "status": "succeeded",
+    "fetched": 1,
+    "new": 0,
+    "updated": 1,
+    "skipped": 0,
+    "rejected": 0,
+    "errors": 0,
+    "error_code": null,
+    "error_summary": null
+  }
+]
