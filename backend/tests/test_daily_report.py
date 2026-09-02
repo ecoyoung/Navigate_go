@@ -137,7 +137,11 @@ def test_daily_report_uses_shanghai_date_and_escapes_content(session_factory):
         assert "本期数据概览" not in rendered
         assert "近 7 日故事" not in rendered
         assert "CST" not in rendered
-        assert "http://" not in rendered.replace("https://report.example.com/story", "")
+        assert 'href="http://' not in rendered
+        assert 'src="http://' not in rendered
+        assert "--accent: #722f37;" in rendered
+        assert "Navigate · 每日简报" in rendered
+        assert "M4.8 2.2h4.2v10.4" in rendered
 
         explicit = collect_daily_report(
             session,

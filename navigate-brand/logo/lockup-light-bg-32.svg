@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 32" width="200" height="32">
+  <!-- navigate lockup -->
+  <g transform="translate(0, 3.5) scale(1.05)">
+    <path fill="#111111" d="M4.8 2.2h4.2v10.4L15.8 2.2H20.2v19.6h-4.2V11.4L9 21.8H4.8V2.2z"/>
+  </g>
+  <text x="30" y="23.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#111111" letter-spacing="-0.025em">navigate</text>
+</svg>

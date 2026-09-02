@@ -486,7 +486,7 @@ def render_daily_report(data: DailyReportData) -> str:
       --paper-deep: #eee6d8;
       --ink: #24201d;
       --muted: #817972;
-      --accent: #9e3155;
+      --accent: #722f37;
       --rule: #d8cdbb;
       --serif: "Songti SC", "STSong", "Noto Serif CJK SC", Georgia, serif;
       --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -507,8 +507,9 @@ def render_daily_report(data: DailyReportData) -> str:
       background: var(--paper); box-shadow: 0 20px 70px rgba(69,52,42,.16); }}
     .masthead {{ text-align: center; border-top: 4px double var(--accent);
       border-bottom: 4px double var(--accent); padding: 28px 16px 24px; }}
+    .masthead .mark {{ display: block; width: 36px; height: 36px; margin: 0 auto 12px; }}
     .eyebrow {{ margin: 0 0 12px; color: var(--accent); font: 700 12px var(--serif);
-      letter-spacing: .3em; text-transform: uppercase; }}
+      letter-spacing: .22em; }}
     h1 {{ margin: 0; font-size: clamp(36px, 6vw, 64px); line-height: 1.08; letter-spacing: .06em;
       font-weight: 800; text-wrap: balance; }}
     .deck {{ margin: 14px 0 0; color: #625b55; font-size: clamp(15px, 2vw, 20px);
@@ -537,7 +538,7 @@ def render_daily_report(data: DailyReportData) -> str:
     .story-points li::before {{ content: ""; position: absolute; left: 1px; top: .78em;
       width: 5px; height: 1px; background: var(--accent); }}
     .story-tags {{ margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }}
-    .story-tags span {{ padding: 3px 7px; border: 1px solid rgba(158,49,85,.26); color: var(--accent);
+    .story-tags span {{ padding: 3px 7px; border: 1px solid rgba(114,47,55,.26); color: var(--accent);
       font: 10px var(--sans); letter-spacing: .04em; }}
     .section-intro {{ max-width: 760px; margin: 8px auto 0; color: var(--muted); text-align: center;
       font-size: 13px; line-height: 1.7; font-style: italic; }}
@@ -573,7 +574,10 @@ def render_daily_report(data: DailyReportData) -> str:
   </div>
   <main class="sheet">
     <header class="masthead">
-      <p class="eyebrow">Navigate Intelligence · Daily Brief</p>
+      <svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#722F37" d="M4.8 2.2h4.2v10.4L15.8 2.2H20.2v19.6h-4.2V11.4L9 21.8H4.8V2.2z"/>
+      </svg>
+      <p class="eyebrow">Navigate · 每日简报</p>
       <h1>每日资讯简报</h1>
       <p class="deck">{html.escape(deck)}</p>
       <div class="edition"><span>{data.issue_date.strftime('%Y 年 %m 月 %d 日')}出版</span>

@@ -109,6 +109,13 @@ const pageTitle = computed(() => {
   if (view.value === 'admin') return '账号管理';
   return selectedTopic.value?.name || '为你精选';
 });
+const editionDate = computed(() =>
+  new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()),
+);
+
+function storyIndex(index: number) {
+  return String(index + 1).padStart(2, '0');
+}
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBase}${path}`, {
@@ -262,7 +269,7 @@ async function discoverSources(topic: Topic, setBusy = true) {
     selectedTopicId.value = topic.id;
     feed.value = result.items;
     view.value = 'for-you';
-    message.value = `已抓取 ${result.fetched_pages} 个完整页面、入库 ${result.ingested_count} 条内容，本次使用 ${result.credits_used} credits`;
+    message.value = `已抓取 ${result.fetched_pages} 个完整页面、入库 ${result.ingested_count} 条内容，本次使用 ${result.credits_used} 点额度`;
     topics.value = await api<Topic[]>('/api/v1/topics');
     await loadDailyReports(topic.id);
   } catch (caught) {
@@ -387,14 +394,22 @@ onMounted(async () => {
 
 <template>
   <main v-if="loading" class="loading-screen">
-    <p>NAVIGATE</p>
+    <div class="brand-lockup">
+      <img src="/brand/logo/mark-wine-24.svg" width="28" height="28" alt="" />
+      <strong>Navigate</strong>
+    </div>
     <span>正在建立你的情报视图</span>
   </main>
 
   <main v-else-if="!user" class="auth-page">
     <section class="login-card">
-      <p class="kicker">NAVIGATE · PERSONAL INTELLIGENCE</p>
-      <h1>登录你的情报台</h1>
+      <header class="paper-masthead">
+        <img src="/brand/logo/mark-wine-24.svg" width="36" height="36" alt="" />
+        <strong>Navigate</strong>
+        <p class="kicker">纸面编辑室</p>
+        <p class="edition">{{ editionDate }}</p>
+      </header>
+      <h1>{{ authMode === 'login' ? '登录后开始订阅' : '创建订阅账号' }}</h1>
       <p>登录后，告诉我们你想持续关注什么。</p>
       <form class="account-form" @submit.prevent="submitAuth">
         <input v-model="email" placeholder="账户名" required />
@@ -407,8 +422,12 @@ onMounted(async () => {
   </main>
 
   <main v-else-if="!topics.length" class="onboarding-page">
-    <section class="onboarding-bubble">
-      <p class="kicker">你的第一份订阅</p>
+    <section class="onboarding-sheet">
+      <header class="paper-masthead compact">
+        <img src="/brand/logo/mark-wine-24.svg" width="28" height="28" alt="" />
+        <strong>Navigate</strong>
+      </header>
+      <p class="kicker">第一份订阅</p>
       <h1>告诉我，你想持续关注什么</h1>
       <p>可以是一组关键词，也可以是一段完整描述。</p>
       <form @submit.prevent="createFirstTopic">
@@ -423,24 +442,36 @@ onMounted(async () => {
 
   <main v-else class="intel-shell">
     <aside class="sidebar">
-      <a class="brand" href="#" @click.prevent="selectTopic(null)">NAVI<span>GATE</span></a>
+      <a class="brand brand-lockup" href="#" @click.prevent="selectTopic(null)">
+        <img src="/brand/logo/mark-wine-24.svg" width="22" height="22" alt="" />
+        <strong>Navigate</strong>
+      </a>
       <nav class="side-nav" aria-label="主要功能">
-        <p>内容</p>
+        <p>目录</p>
         <button :class="{ active: view === 'for-you' && !selectedTopicId }" @click="selectTopic(null)">
-          <span>⌁</span> 为你精选
+          <i class="icon icon-featured" aria-hidden="true" /> 为你精选
         </button>
         <button :class="{ active: view === 'topics' }" @click="view = 'topics'">
-          <span>◫</span> 我的主题 <b>{{ topics.length }}</b>
+          <i class="icon icon-topics" aria-hidden="true" /> 我的主题 <b>{{ topics.length }}</b>
         </button>
         <button :class="{ active: view === 'explore' }" @click="view = 'explore'">
-          <span>⌕</span> 探索情报
+          <i class="icon icon-explore" aria-hidden="true" /> 探索情报
         </button>
         <button v-if="user.role === 'admin'" :class="{ active: view === 'admin' }" @click="openAdminWorkspace">
-          <span>◇</span> 账号管理
+          <i class="icon icon-settings" aria-hidden="true" /> 账号管理
         </button>
-        <a v-if="user && selectedTopic && selectedReportDate" class="nav-link" :href="dailyReportUrl()" target="_blank" rel="noreferrer"><span>▤</span> 每日简报</a>
-        <button v-else disabled><span>▤</span> 每日简报</button>
-        <button disabled><span>♡</span> 收藏</button>
+        <a
+          v-if="user && selectedTopic && selectedReportDate"
+          class="nav-link"
+          :href="dailyReportUrl()"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <i class="icon icon-daily" aria-hidden="true" /> 每日简报
+        </a>
+        <button v-else disabled>
+          <i class="icon icon-daily" aria-hidden="true" /> 每日简报
+        </button>
       </nav>
 
       <section v-if="user" class="topic-shortcuts">
@@ -466,27 +497,23 @@ onMounted(async () => {
     <section class="content-area">
       <header class="content-header">
         <div>
-          <p>PERSONAL INTELLIGENCE / 个性化情报</p>
+          <p>纸面编辑室 · {{ editionDate }}</p>
           <h1>{{ pageTitle }}</h1>
         </div>
-        <button v-if="user" class="new-topic" type="button" @click="composerOpen = true">＋ 新建主题</button>
+        <button v-if="user" class="new-topic" type="button" @click="composerOpen = true">
+          <i class="icon icon-new" aria-hidden="true" /> 新建主题
+        </button>
         <button v-else class="new-topic" type="button" @click="accountOpen = true">登录后订阅</button>
       </header>
 
       <div v-if="message" class="notice success" @click="message = ''">{{ message }}</div>
       <div v-if="error" class="notice error" @click="error = ''">{{ error }}</div>
 
-      <section v-if="!user && view !== 'explore'" class="hero-composer">
-        <p>你的专属情报入口</p>
-        <h2>告诉我，你想持续关注什么</h2>
-        <p>可以是一组关键词，也可以是一段完整描述。系统会先查共享数据池，再由你决定是否联网发现更多来源。</p>
-        <button type="button" @click="accountOpen = true">登录并创建主题</button>
-        <div class="examples"><span>消费品牌出海东南亚</span><span>具身智能融资与订单</span><span>敏感肌防晒新品</span></div>
-      </section>
-
-      <section v-else-if="view === 'topics'" class="topic-grid">
+      <section v-if="view === 'topics'" class="topic-grid">
         <button class="topic-card create-card" type="button" @click="composerOpen = true">
-          <b>＋</b><span>创建一个新主题</span><small>用关键词或自然语言描述兴趣</small>
+          <i class="icon icon-new" aria-hidden="true" />
+          <span>创建一个新主题</span>
+          <small>用关键词或自然语言描述兴趣</small>
         </button>
         <article v-for="topic in topics" :key="topic.id" class="topic-card">
           <div class="topic-card-top"><i :class="topic.status" /><span>{{ topic.status === 'active' ? '持续更新' : '已暂停' }}</span></div>
@@ -495,9 +522,9 @@ onMounted(async () => {
           <div class="topic-stats"><span><b>{{ topic.match_count }}</b> 条匹配</span><span><b>{{ topic.candidate_source_count }}</b> 个候选源</span></div>
           <div class="topic-actions">
             <button @click="selectTopic(topic.id)">查看内容</button>
-            <button @click="discoverSources(topic)">发现来源</button>
+            <button @click="discoverSources(topic)"><i class="icon icon-source" aria-hidden="true" />发现来源</button>
             <button @click="toggleTopic(topic)">{{ topic.status === 'active' ? '暂停' : '恢复' }}</button>
-            <button class="danger-action" :disabled="busy" @click="deleteTopic(topic)">删除</button>
+            <button class="danger-action" :disabled="busy" @click="deleteTopic(topic)"><i class="icon icon-delete" aria-hidden="true" />删除</button>
           </div>
         </article>
       </section>
@@ -505,7 +532,7 @@ onMounted(async () => {
       <section v-else-if="view === 'admin' && user.role === 'admin'" class="admin-workspace">
         <div class="stream-heading"><div><p>仅管理员可见</p><h2>创建与维护登录账号</h2></div><span>{{ adminUsers.length }} 个账号</span></div>
         <section class="admin-create-panel">
-          <div><p class="kicker">CREATE ACCOUNT</p><h3>创建账号</h3><p>新用户使用账户名和临时密码登录，首次登录后必须修改密码。</p></div>
+          <div><p class="kicker">账号</p><h3>创建账号</h3><p>新用户使用账户名和临时密码登录，首次登录后必须修改密码。</p></div>
           <form class="account-form" @submit.prevent="createManagedUser">
             <input v-model="adminAccount" placeholder="账户名" required />
             <input v-model="adminPassword" type="password" minlength="12" placeholder="临时密码（至少 12 位）" required />
@@ -525,9 +552,13 @@ onMounted(async () => {
 
       <section v-else-if="view === 'explore'" class="stream-section">
         <div class="stream-heading"><div><p>公共内容池</p><h2>跨行业探索</h2></div><span>{{ publicStories.length }} 条当前精选</span></div>
-        <article v-for="story in publicStories" :key="story.id" class="intel-card">
+        <article v-for="(story, index) in publicStories" :key="story.id" class="intel-card">
+          <span class="story-index">{{ storyIndex(index) }}</span>
           <div class="meta"><span>{{ story.source_name }}</span><time>{{ shortDate(story.published_at) }}</time></div>
-          <h2><a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer">{{ story.title_zh }}</a><template v-else>{{ story.title_zh }}</template></h2>
+          <h2>
+            <a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer">{{ story.title_zh }}<i class="icon icon-external" aria-hidden="true" /></a>
+            <template v-else>{{ story.title_zh }}</template>
+          </h2>
           <p>{{ story.summary_zh }}</p>
           <div class="topic-tags"><span v-for="tag in story.tags" :key="tag">{{ tag }}</span></div>
         </article>
@@ -539,9 +570,13 @@ onMounted(async () => {
         </div>
         <template v-else>
           <div class="stream-heading"><div><p>{{ selectedTopic ? selectedTopic.intent_text : '所有活动主题的合并结果' }}</p><h2>最新匹配</h2></div><span>{{ feed.length }} 条</span></div>
-          <article v-for="item in (selectedTopic ? readerReadyFeed : feed)" :key="item.content_id" class="intel-card">
+          <article v-for="(item, index) in (selectedTopic ? readerReadyFeed : feed)" :key="item.content_id" class="intel-card">
+            <span class="story-index">{{ storyIndex(index) }}</span>
             <div class="meta"><span>{{ item.source_name }}</span><time>{{ shortDate(item.published_at) }}</time></div>
-            <h2><a v-if="item.url" :href="item.url" target="_blank" rel="noreferrer">{{ item.title }}</a><template v-else>{{ item.title }}</template></h2>
+            <h2>
+              <a v-if="item.url" :href="item.url" target="_blank" rel="noreferrer">{{ item.title }}<i class="icon icon-external" aria-hidden="true" /></a>
+              <template v-else>{{ item.title }}</template>
+            </h2>
             <p v-if="item.excerpt">{{ item.excerpt }}</p>
             <div class="topic-tags">
               <span v-for="name in item.topic_names" :key="`topic-${name}`">{{ name }}</span>
@@ -550,9 +585,13 @@ onMounted(async () => {
           </article>
           <template v-if="selectedTopic && enrichmentFeed.length">
             <div class="stream-heading enrichment-heading"><div><h2>待补全</h2></div><span>{{ enrichmentFeed.length }} 条</span></div>
-            <article v-for="item in enrichmentFeed" :key="item.content_id" class="intel-card enrichment-card">
+            <article v-for="(item, index) in enrichmentFeed" :key="item.content_id" class="intel-card enrichment-card">
+              <span class="story-index">{{ storyIndex(index) }}</span>
               <div class="meta"><span>{{ item.source_name }}</span><time>{{ shortDate(item.published_at) }}</time></div>
-              <h2><a v-if="item.url" :href="item.url" target="_blank" rel="noreferrer">{{ item.title }}</a><template v-else>{{ item.title }}</template></h2>
+              <h2>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noreferrer">{{ item.title }}<i class="icon icon-external" aria-hidden="true" /></a>
+                <template v-else>{{ item.title }}</template>
+              </h2>
               <p v-if="item.excerpt">{{ item.excerpt }}</p>
               <div class="topic-tags"><span v-for="name in item.topic_names" :key="`topic-${name}`">{{ name }}</span><span v-for="tag in item.tags" :key="`tag-${tag}`">{{ tag }}</span></div>
             </article>
@@ -565,22 +604,45 @@ onMounted(async () => {
     <aside class="context-panel">
       <section><p>今日概览</p><div class="overview-number">{{ feed.length }}</div><span>当前匹配内容</span></section>
       <section><p>活动主题</p><div class="mini-list"><button v-for="topic in activeTopics" :key="topic.id" @click="selectTopic(topic.id)"><i class="active" /><span>{{ topic.name }}</span><b>{{ topic.match_count }}</b></button><small v-if="!activeTopics.length">创建主题后在这里查看</small></div></section>
-      <section class="budget-card"><p>来源发现额度</p><strong>{{ selectedTopic?.daily_credit_limit ?? 0 }}</strong><span>credits / 主题 / 日</span><small>只有你主动点击“发现来源”才会使用 Firecrawl。</small></section>
-      <section v-if="user && selectedTopic" class="daily-history"><p>{{ selectedTopic.name }} · 历史日报</p><select v-if="dailyReports.length" v-model="selectedReportDate"><option v-for="report in dailyReports" :key="report.coverage_date" :value="report.coverage_date">{{ report.coverage_date }} · {{ report.available_content_count }} 条</option></select><a v-if="selectedReportDate" :href="dailyReportUrl()" target="_blank" rel="noreferrer">查看日报 ↗</a><small v-else>暂无已发布日期的内容</small></section>
+      <section class="budget-card"><p>来源发现额度</p><strong>{{ selectedTopic?.daily_credit_limit ?? 0 }}</strong><span>每日额度 / 主题</span><small>只有你主动发现来源时才会消耗额度。</small></section>
+      <section v-if="user && selectedTopic" class="daily-history"><p>{{ selectedTopic.name }} · 历史日报</p><select v-if="dailyReports.length" v-model="selectedReportDate"><option v-for="report in dailyReports" :key="report.coverage_date" :value="report.coverage_date">{{ report.coverage_date }} · {{ report.available_content_count }} 条</option></select><a v-if="selectedReportDate" :href="dailyReportUrl()" target="_blank" rel="noreferrer"><i class="icon icon-daily" aria-hidden="true" />查看日报</a><small v-else>暂无已发布日期的内容</small></section>
       <section v-if="discovered.length"><p>最近发现</p><a v-for="item in discovered.slice(0, 5)" :key="item.id" :href="item.canonical_url" target="_blank" rel="noreferrer"><span>{{ item.title || item.host }}</span><small>{{ item.host }}</small></a></section>
     </aside>
+
+    <nav class="mobile-nav" aria-label="移动导航">
+      <button :class="{ active: view === 'for-you' && !selectedTopicId }" @click="selectTopic(null)">
+        <i class="icon icon-featured" aria-hidden="true" />精选
+      </button>
+      <button :class="{ active: view === 'topics' }" @click="view = 'topics'">
+        <i class="icon icon-topics" aria-hidden="true" />主题
+      </button>
+      <button :class="{ active: view === 'explore' }" @click="view = 'explore'">
+        <i class="icon icon-explore" aria-hidden="true" />探索
+      </button>
+      <a
+        v-if="selectedTopic && selectedReportDate"
+        :href="dailyReportUrl()"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <i class="icon icon-daily" aria-hidden="true" />日报
+      </a>
+      <button v-else disabled>
+        <i class="icon icon-daily" aria-hidden="true" />日报
+      </button>
+    </nav>
 
     <div v-if="composerOpen" class="modal-backdrop" @click.self="composerOpen = false">
       <section class="topic-composer" role="dialog" aria-modal="true" aria-label="创建主题">
         <button class="modal-close" @click="composerOpen = false">×</button>
-        <p class="kicker">NEW INTELLIGENCE TOPIC</p><h2>你想持续关注什么？</h2>
+        <p class="kicker">新主题</p><h2>你想持续关注什么？</h2>
         <form @submit.prevent="createTopicFromComposer">
           <label>主题描述<textarea v-model="topicIntent" rows="4" placeholder="例如：持续关注中国消费品牌出海东南亚的开店、经销合作和监管变化，排除纯促销软文。" required /></label>
           <div class="form-grid"><label>主题名称（可选）<input v-model="topicName" placeholder="自动生成" /></label><label>更新频率<select v-model="topicCadence"><option value="daily">每日</option><option value="weekly">每周</option></select></label></div>
           <label>重点关键词（可选，用逗号分隔）<input v-model="topicKeywords" placeholder="东南亚，出海，经销合作" /></label>
           <label>排除内容（可选）<input v-model="topicExclusions" placeholder="促销软文，招聘" /></label>
-          <div class="credit-row"><span>每日联网发现上限</span><input v-model.number="topicCreditLimit" type="number" min="0" max="100" /><small>credits</small></div>
-          <p class="form-note">创建时只查询现有共享数据池，不会自动使用 Firecrawl。</p>
+          <div class="credit-row"><span>每日联网发现上限</span><input v-model.number="topicCreditLimit" type="number" min="0" max="100" /><small>额度</small></div>
+          <p class="form-note">创建时只查询现有共享数据池，不会自动消耗联网额度。</p>
           <button class="primary-button" type="submit" :disabled="busy">{{ busy ? '正在建立主题' : '创建并预览' }}</button>
         </form>
       </section>
@@ -590,13 +652,13 @@ onMounted(async () => {
       <section class="account-modal" role="dialog" aria-modal="true" aria-label="账号">
         <button class="modal-close" @click="accountOpen = false">×</button>
         <template v-if="user">
-          <p class="kicker">NAVIGATE ACCOUNT</p><h2>{{ user.display_name }}</h2><p class="muted">{{ user.email }} · {{ user.role === 'admin' ? '管理员' : '订阅读者' }}</p>
+          <p class="kicker">账号</p><h2>{{ user.display_name }}</h2><p class="muted">{{ user.email }} · {{ user.role === 'admin' ? '管理员' : '订阅读者' }}</p>
           <form v-if="user.must_change_password" class="account-form" @submit.prevent="changePassword"><p>首次登录请更换临时密码。</p><input v-model="currentPassword" type="password" placeholder="当前临时密码" required /><input v-model="newPassword" type="password" minlength="12" placeholder="新密码（至少 12 位）" required /><button class="primary-button" :disabled="busy">更新密码</button></form>
           <button class="text-button" @click="logout">退出登录</button>
           <button v-if="user.role === 'admin'" class="text-button" @click="accountOpen = false; openAdminWorkspace()">前往账号管理</button>
         </template>
         <template v-else>
-          <p class="kicker">PERSONAL INTELLIGENCE</p><h2>{{ authMode === 'login' ? '登录你的情报台' : '创建订阅账号' }}</h2>
+          <p class="kicker">纸面编辑室</p><h2>{{ authMode === 'login' ? '登录后开始订阅' : '创建订阅账号' }}</h2>
           <form class="account-form" @submit.prevent="submitAuth"><input v-model="email" placeholder="账户名" required /><input v-model="password" type="password" placeholder="密码" :minlength="authMode === 'register' ? 12 : 1" required /><button class="primary-button" :disabled="busy">{{ busy ? '处理中' : authMode === 'login' ? '登录' : '注册' }}</button></form>
           <button class="text-button" @click="authMode = authMode === 'login' ? 'register' : 'login'; error = ''">{{ authMode === 'login' ? '还没有账号？注册' : '已有账号？登录' }}</button>
         </template>
