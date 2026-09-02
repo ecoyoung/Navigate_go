@@ -9,6 +9,7 @@ from app.daily_report import (
     available_topic_report_dates,
     collect_daily_report,
     collect_topic_daily_report,
+    compose_topic_edition,
     render_daily_report,
 )
 from app.domain_assignments import sync_processing_results_to_domain
@@ -144,6 +145,9 @@ def test_daily_report_uses_shanghai_date_and_escapes_content(session_factory):
         assert "--accent: #722f37;" in rendered
         assert "Navigate · 每日简报" in rendered
         assert "M4.8 2.2h4.2v10.4" in rendered
+        assert "<h1>全行业</h1>" in rendered
+        assert "一、要闻" in rendered
+        assert "本期资讯" not in rendered
 
         explicit = collect_daily_report(
             session,
@@ -330,7 +334,57 @@ def test_topic_daily_report_endpoint_renders_chinese_html(client, session_factor
     ).status_code == 200
     response = client.get(f"/api/v1/topics/{topic_id}/daily-reports/2026-08-30")
     assert response.status_code == 200
+    assert "<h1>主题日报</h1>" in response.text
     assert "中文主题标题" in response.text
-    assert "主题日报" in response.text
+    assert "中文主题摘要，来自原始文章证据。" in response.text
+    assert "一、主题" in response.text
+    assert "本期资讯" not in response.text
     assert "本期整理" not in response.text
     assert "已发布资讯" not in response.text
+    assert "--accent: #722f37;" in response.text
+
+
+def test_compose_topic_edition_uses_top_story_and_tag_sections():
+    editorial = {
+        "stories": [
+            {
+                "story_key": "content:1",
+                "chinese_title": "融资落地",
+                "chinese_summary": "某公司完成新一轮融资。",
+                "tags": [{"label_zh": "融资"}],
+            },
+            {
+                "story_key": "content:2",
+                "chinese_title": "监管发文",
+                "chinese_summary": "监管部门发布新规。",
+                "tags": [{"label_zh": "监管"}],
+            },
+        ]
+    }
+    edition = compose_topic_edition("具身智能", editorial, ["content:1", "content:2"])
+    assert edition["daily_lead"]["deck"] == "融资落地"
+    assert edition["daily_lead"]["text"] == "某公司完成新一轮融资。"
+    assert [section["title"] for section in edition["sections"]] == ["融资", "监管"]
+    assert "本期资讯" not in str(edition)
+
+
+def test_compose_topic_edition_splits_untagged_stories():
+    editorial = {
+        "stories": [
+            {
+                "story_key": "content:1",
+                "chinese_title": "头条事实",
+                "chinese_summary": "这是当天最重要的一条进展。",
+                "tags": [],
+            },
+            {
+                "story_key": "content:2",
+                "chinese_title": "后续事实",
+                "chinese_summary": "另一条相关进展。",
+                "tags": [],
+            },
+        ]
+    }
+    edition = compose_topic_edition("主题", editorial, ["content:1", "content:2"])
+    assert [section["title"] for section in edition["sections"]] == ["要闻", "续闻"]
+    assert edition["sections"][0]["story_refs"] == ["content:1"]

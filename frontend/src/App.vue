@@ -102,7 +102,6 @@ const activeTopics = computed(() => topics.value.filter((topic) => topic.status 
 const selectedTopic = computed(() => topics.value.find((topic) => topic.id === selectedTopicId.value));
 const publicStories = computed(() => publicData.value?.stories.slice(0, 18) || []);
 const readerReadyFeed = computed(() => feed.value.filter((item) => item.reader_eligible));
-const enrichmentFeed = computed(() => feed.value.filter((item) => !item.reader_eligible));
 const pageTitle = computed(() => {
   if (view.value === 'topics') return '我的主题';
   if (view.value === 'explore') return '探索';
@@ -516,7 +515,7 @@ onMounted(async () => {
           <div class="topic-card-top"><i :class="topic.status" /><span>{{ topic.status === 'active' ? '持续更新' : '已暂停' }}</span></div>
           <h2>{{ topic.name }}</h2>
           <p>{{ topic.intent_text }}</p>
-          <div class="topic-stats"><span><b>{{ topic.match_count }}</b> 条匹配</span><span><b>{{ topic.candidate_source_count }}</b> 个候选源</span></div>
+          <div class="topic-stats"><span><b>{{ topic.match_count }}</b> 篇</span></div>
           <div class="topic-actions">
             <button @click="selectTopic(topic.id)">查看内容</button>
             <button @click="discoverSources(topic)"><i class="icon icon-source" aria-hidden="true" />发现来源</button>
@@ -566,7 +565,7 @@ onMounted(async () => {
           <h2>还没有主题</h2><button @click="composerOpen = true">创建</button>
         </div>
         <template v-else>
-          <div class="stream-heading"><div><h2>本期</h2></div><span>{{ feed.length }}</span></div>
+          <div class="stream-heading"><div><h2>本期</h2></div><span>{{ selectedTopic ? readerReadyFeed.length : feed.length }}</span></div>
           <article v-for="(item, index) in (selectedTopic ? readerReadyFeed : feed)" :key="item.content_id" class="intel-card">
             <span class="story-index">{{ storyIndex(index) }}</span>
             <div class="meta"><span>{{ item.source_name }}</span><time>{{ shortDate(item.published_at) }}</time></div>
@@ -580,30 +579,17 @@ onMounted(async () => {
               <span v-for="tag in item.tags" :key="`tag-${tag}`">{{ tag }}</span>
             </div>
           </article>
-          <template v-if="selectedTopic && enrichmentFeed.length">
-            <div class="stream-heading enrichment-heading"><div><h2>待补全</h2></div><span>{{ enrichmentFeed.length }} 条</span></div>
-            <article v-for="(item, index) in enrichmentFeed" :key="item.content_id" class="intel-card enrichment-card">
-              <span class="story-index">{{ storyIndex(index) }}</span>
-              <div class="meta"><span>{{ item.source_name }}</span><time>{{ shortDate(item.published_at) }}</time></div>
-              <h2>
-                <a v-if="item.url" :href="item.url" target="_blank" rel="noreferrer">{{ item.title }}<i class="icon icon-external" aria-hidden="true" /></a>
-                <template v-else>{{ item.title }}</template>
-              </h2>
-              <p v-if="item.excerpt">{{ item.excerpt }}</p>
-              <div class="topic-tags"><span v-for="name in item.topic_names" :key="`topic-${name}`">{{ name }}</span><span v-for="tag in item.tags" :key="`tag-${tag}`">{{ tag }}</span></div>
-            </article>
-          </template>
-          <div v-if="user && topics.length && !feed.length" class="empty-workspace compact"><h2>暂无匹配</h2></div>
+          <div v-if="user && topics.length && !(selectedTopic ? readerReadyFeed.length : feed.length)" class="empty-workspace compact"><h2>暂无匹配</h2></div>
         </template>
       </section>
     </section>
 
     <aside class="context-panel">
-      <section><p>今日概览</p><div class="overview-number">{{ feed.length }}</div><span>篇</span></section>
-      <section><p>活动主题</p><div class="mini-list"><button v-for="topic in activeTopics" :key="topic.id" @click="selectTopic(topic.id)"><i class="active" /><span>{{ topic.name }}</span><b>{{ topic.match_count }}</b></button><small v-if="!activeTopics.length">暂无</small></div></section>
-      <section class="budget-card"><p>额度</p><strong>{{ selectedTopic?.daily_credit_limit ?? 0 }}</strong><span>每日</span></section>
+      <section><p>今日</p><div class="overview-number">{{ selectedTopic ? readerReadyFeed.length : feed.length }}</div><span>篇</span></section>
+      <section><p>主题</p><div class="mini-list"><button v-for="topic in activeTopics" :key="topic.id" @click="selectTopic(topic.id)"><i class="active" /><span>{{ topic.name }}</span><b>{{ topic.match_count }}</b></button><small v-if="!activeTopics.length">暂无</small></div></section>
+      <section v-if="view === 'topics'" class="budget-card"><p>额度</p><strong>{{ selectedTopic?.daily_credit_limit ?? 0 }}</strong><span>每日</span></section>
       <section v-if="user && selectedTopic" class="daily-history"><p>日报</p><select v-if="dailyReports.length" v-model="selectedReportDate"><option v-for="report in dailyReports" :key="report.coverage_date" :value="report.coverage_date">{{ report.coverage_date }} · {{ report.available_content_count }} 条</option></select><a v-if="selectedReportDate" :href="dailyReportUrl()" target="_blank" rel="noreferrer"><i class="icon icon-daily" aria-hidden="true" />查看</a><small v-else>暂无</small></section>
-      <section v-if="discovered.length"><p>最近发现</p><a v-for="item in discovered.slice(0, 5)" :key="item.id" :href="item.canonical_url" target="_blank" rel="noreferrer"><span>{{ item.title || item.host }}</span><small>{{ item.host }}</small></a></section>
+      <section v-if="view === 'topics' && discovered.length"><p>最近发现</p><a v-for="item in discovered.slice(0, 5)" :key="item.id" :href="item.canonical_url" target="_blank" rel="noreferrer"><span>{{ item.title || item.host }}</span><small>{{ item.host }}</small></a></section>
     </aside>
 
     <nav class="mobile-nav" aria-label="移动导航">

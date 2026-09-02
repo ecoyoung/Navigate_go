@@ -442,6 +442,61 @@ def _reader_kicker(value: object, fallback: str = "") -> str:
     return text
 
 
+def _primary_tag(story: dict) -> str:
+    tags = story.get("tags") or []
+    if not tags:
+        return ""
+    first = tags[0]
+    if isinstance(first, dict):
+        return str(first.get("label_zh") or "").strip()
+    return str(first).strip()
+
+
+def compose_topic_edition(topic_name: str, editorial: dict, ordered_refs: list[str]) -> dict:
+    """Build a paper edition from topic story copy, without census leads."""
+    stories = list(editorial.get("stories") or [])
+    by_key = {str(item.get("story_key") or ""): item for item in stories if item.get("story_key")}
+    ordered = [by_key[ref] for ref in ordered_refs if ref in by_key]
+    if not ordered:
+        return {
+            **editorial,
+            "daily_lead": {"deck": topic_name, "text": "", "story_refs": []},
+            "sections": [],
+            "stories": stories,
+        }
+    top = ordered[0]
+    groups: dict[str, list[str]] = {}
+    section_order: list[str] = []
+    tagged = False
+    for item in ordered:
+        label = _primary_tag(item)
+        tagged = tagged or bool(label)
+        label = label or "要闻"
+        if label not in groups:
+            groups[label] = []
+            section_order.append(label)
+        groups[label].append(str(item["story_key"]))
+    if not tagged and len(ordered) > 1:
+        groups = {
+            "要闻": [str(ordered[0]["story_key"])],
+            "续闻": [str(item["story_key"]) for item in ordered[1:]],
+        }
+        section_order = ["要闻", "续闻"]
+    return {
+        **editorial,
+        "daily_lead": {
+            "deck": _reader_kicker(top.get("chinese_title"), topic_name),
+            "text": _reader_kicker(top.get("chinese_summary")),
+            "story_refs": [str(top["story_key"])],
+        },
+        "sections": [
+            {"title": title, "intro": "", "story_refs": groups[title]}
+            for title in section_order
+        ],
+        "stories": stories,
+    }
+
+
 def render_daily_report(data: DailyReportData) -> str:
     masthead_date = data.report_date.strftime("%Y.%m.%d")
     editorial = data.editorial or {}
@@ -470,7 +525,7 @@ def render_daily_report(data: DailyReportData) -> str:
             prefix = numeral[index - 1] if index <= len(numeral) else str(index)
             section_parts.append(
                 _section_html(
-                    f"{prefix}、{section.get('title') or '本期资讯'}",
+                    f"{prefix}、{section.get('title') or '要闻'}",
                     str(section.get("intro") or ""),
                     section_stories,
                     next_number,
@@ -480,14 +535,14 @@ def render_daily_report(data: DailyReportData) -> str:
             next_number += len(section_stories)
         sections = "".join(section_parts)
     else:
-        sections = _section_html("一、本期资讯", "", data.stories, 1, editorial_stories)
+        sections = _section_html("一、要闻", "", data.stories, 1, editorial_stories)
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Navigate 每日资讯简报 · {masthead_date}</title>
+  <title>Navigate · {html.escape(data.domain_name)} · {masthead_date}</title>
   <style>
     :root {{
       --paper: #f7f2e8;
@@ -586,7 +641,7 @@ def render_daily_report(data: DailyReportData) -> str:
         <path fill="#722F37" d="M4.8 2.2h4.2v10.4L15.8 2.2H20.2v19.6h-4.2V11.4L9 21.8H4.8V2.2z"/>
       </svg>
       <p class="eyebrow">Navigate · 每日简报</p>
-      <h1>每日资讯简报</h1>
+      <h1>{html.escape(data.domain_name)}</h1>
       {f'<p class="deck">{html.escape(deck)}</p>' if deck else ''}
       <div class="edition"><span>{data.issue_date.strftime('%Y 年 %m 月 %d 日')}出版</span></div>
     </header>

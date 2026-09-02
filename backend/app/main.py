@@ -51,6 +51,7 @@ from .daily_report import (
     available_topic_report_dates,
     collect_daily_report,
     collect_topic_daily_report,
+    compose_topic_edition,
     render_daily_report,
 )
 from .database import SessionLocal, database_ready, get_db
@@ -881,25 +882,9 @@ def topic_daily_report_document(
         db, topic, {story.content_item_id for story in report.stories}
     )
     ordered_refs = [f"content:{story.content_item_id}" for story in report.stories]
-    lead = editorial.get("daily_lead") or {}
     report = replace(
         report,
-        editorial={
-            **editorial,
-            "daily_lead": {
-                "deck": str(lead.get("deck") or topic.name).strip(),
-                "text": str(lead.get("text") or "").strip(),
-                "story_refs": list(lead.get("story_refs") or ordered_refs),
-            },
-            "sections": editorial.get("sections")
-            or [
-                {
-                    "title": "本期资讯",
-                    "intro": "",
-                    "story_refs": ordered_refs,
-                }
-            ],
-        },
+        editorial=compose_topic_edition(topic.name, editorial, ordered_refs),
     )
     return HTMLResponse(render_daily_report(report))
 
