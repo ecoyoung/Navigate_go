@@ -18,7 +18,6 @@ from fastapi import (
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import ValidationError
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -56,6 +55,7 @@ from .daily_report import (
 )
 from .database import SessionLocal, database_ready, get_db
 from .entity_reviews import decide_entity_candidate
+from .event_clustering import refresh_event_clusters
 from .firecrawl import (
     SCRAPE_BATCH_MAX,
     FirecrawlClient,
@@ -92,6 +92,16 @@ from .models import (
     UserSubscription,
 )
 from .normalization import normalize_url
+from .reader_cards import build_reader_card
+from .reader_surface import (
+    is_curated_keep,
+    latest_value_decisions,
+    list_reader_events,
+    reader_event_detail,
+    render_topic_rss,
+    search_explore_contents,
+    search_topic_contents,
+)
 from .run_coverage import resolve_run_coverage
 from .schemas import (
     AdminUserCreate,
@@ -102,6 +112,7 @@ from .schemas import (
     ContentValueScoreRead,
     CrawlAccepted,
     CrawlRunRead,
+    CrawlSelectedRequest,
     DailyReportHistoryItem,
     DomainRead,
     EntityAliasRead,
@@ -116,9 +127,14 @@ from .schemas import (
     LoginRequest,
     PageSnapshotRead,
     RawItemRead,
+    ReaderEventRead,
     RegisterRequest,
     SourceCreate,
+    SourcePathRead,
+    SourceProbePreview,
+    SourceProbeRequest,
     SourceRead,
+    SourceRetireResult,
     SourceUpdate,
     SubscriptionRead,
     SubscriptionUpdate,
@@ -133,16 +149,30 @@ from .schemas import (
     UserRead,
 )
 from .secrets import MissingSecretError, require_secret
+from .source_admin import (
+    catalog_id_for_url,
+    display_name_for_url,
+    is_removed_from_catalog,
+    is_website_source,
+    probe_preview,
+    queue_source_crawl,
+    registration_from_probe,
+    restore_website_source,
+    retire_website_source,
+    source_execution_engine,
+    source_viable_paths,
+    website_sources,
+)
+from .source_probe_fetch import ProbeFetchError, probe_public_url
 from .topic_discovery import (
     attach_discovered_match,
     content_needs_discovery_enrichment,
-    enrich_discovered_content_from_web,
     enrichment_retry_due,
     existing_content_for_url,
     ingest_discovered_metadata,
     ingest_discovered_page,
+    ingest_discovered_url_preferring_direct,
 )
-from .topic_intelligence import process_topic_contents
 from .topic_matching import (
     COMPILER_NAME,
     COMPILER_VERSION,
@@ -213,6 +243,15 @@ def _source_read(source: Source, health: SourceHealth) -> SourceRead:
             "consecutive_failures": health.consecutive_failures,
             "circuit_open": health.circuit_open,
             "last_finished_at": health.last_finished_at,
+            "last_fetched_count": health.last_fetched_count,
+            "last_new_count": health.last_new_count,
+            "last_skipped_count": health.last_skipped_count,
+            "last_rejected_count": health.last_rejected_count,
+            "last_error_summary": health.last_error_summary,
+            "execution_engine": source_execution_engine(source),
+            "viable_paths": [
+                SourcePathRead.model_validate(item) for item in source_viable_paths(source, health)
+            ],
         }
     )
 
@@ -316,56 +355,30 @@ def _topic_editorial_map(
     return result
 
 
-def _topic_daily_editorial(db: Session, topic: InterestTopic, content_ids: set[int]) -> dict:
-    """Return Chinese topic-specific editorial fields, creating only missing cached items."""
-    rows = list(
-        db.execute(
-            select(ContentItem, Source)
-            .join(Source, Source.id == ContentItem.source_id)
-            .where(ContentItem.id.in_(content_ids))
-        )
+def _to_topic_feed_item(
+    content: ContentItem,
+    source: Source,
+    artifact: dict,
+    *,
+    topics: list[InterestTopic] | None = None,
+    match_score: float = 0,
+) -> TopicFeedItem:
+    card = build_reader_card(content, source, artifact)
+    topic_list = topics or []
+    return TopicFeedItem(
+        **card,
+        topic_ids=[topic.id for topic in topic_list],
+        topic_names=[topic.name for topic in topic_list],
+        match_score=match_score,
     )
-    artifacts = _topic_editorial_map(db, {(topic.id, content_id) for content_id in content_ids})
-    missing = [pair for pair in rows if (topic.id, pair[0].id) not in artifacts]
-    if missing:
-        try:
-            client = DeepSeekClient(api_key=require_secret("DEEPSEEK_API_KEY"))
-        except MissingSecretError as exc:
-            raise HTTPException(503, "中文编辑服务未配置") from exc
-        try:
-            for start in range(0, len(missing), 12):
-                process_topic_contents(db, topic, missing[start : start + 12], client)
-        except (RuntimeError, ValueError, ValidationError):
-            db.rollback()
-            return {
-                "stories": [
-                    {
-                        "story_key": f"content:{content.id}",
-                        "chinese_title": content.title,
-                        "chinese_summary": content.excerpt
-                        or " ".join((content.body or "").split())[:300],
-                        "tags": [],
-                    }
-                    for content, _source in rows
-                ]
-            }
-        artifacts = _topic_editorial_map(db, {(topic.id, content_id) for content_id in content_ids})
-    stories = []
-    for content_id in sorted(content_ids):
-        artifact = artifacts.get((topic.id, content_id))
-        if artifact is None:
-            raise HTTPException(502, "主题中文编辑结果未生成")
-        stories.append(
-            {
-                "story_key": f"content:{content_id}",
-                "chinese_title": artifact.get("chinese_title"),
-                "chinese_summary": artifact.get("chinese_summary"),
-                "tags": [
-                    {"label_zh": tag} for tag in artifact.get("tags_zh", []) if isinstance(tag, str)
-                ],
-            }
-        )
-    return {"stories": stories}
+
+
+def _aware_timestamp(value: datetime | None) -> datetime:
+    if value is None:
+        return datetime.min.replace(tzinfo=UTC)
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 def _feed_items(
@@ -375,6 +388,7 @@ def _feed_items(
     limit: int,
     *,
     include_enrichment: bool = False,
+    curated: bool = False,
 ) -> list[TopicFeedItem]:
     statement = (
         select(TopicMatch, InterestTopic, ContentItem, Source)
@@ -400,7 +414,9 @@ def _feed_items(
             func.coalesce(ContentItem.published_at, ContentItem.discovered_at).desc(),
             TopicMatch.score.desc(),
         )
-    rows = db.execute(statement.limit(limit * (10 if include_enrichment else 4))).all()
+    overfetch = 10 if include_enrichment else 8 if curated else 4
+    rows = db.execute(statement.limit(limit * overfetch)).all()
+    value_decisions = latest_value_decisions(db) if curated else {}
     grouped: dict[int, dict] = {}
     for match, topic, content, source in rows:
         if not include_enrichment and not is_reader_eligible(content):
@@ -424,40 +440,65 @@ def _feed_items(
         db,
         {(item["editorial_topic_id"], item["content"].id) for item in grouped.values()},
     )
-    result: list[TopicFeedItem] = []
     ordered_items = list(grouped.values())
     if include_enrichment:
         ordered_items.sort(
             key=lambda item: (
                 not is_reader_eligible(item["content"]),
                 -item["match"].score,
-                item["content"].published_at or item["content"].discovered_at,
+                _aware_timestamp(item["content"].published_at or item["content"].discovered_at),
             )
         )
-    for item in ordered_items[:limit]:
+    result_items = []
+    for item in ordered_items:
+        content = item["content"]
+        if (
+            curated
+            and is_reader_eligible(content)
+            and not is_curated_keep(content.id, value_decisions)
+        ):
+            continue
+        result_items.append(item)
+        if len(result_items) >= limit:
+            break
+    result: list[TopicFeedItem] = []
+    for item in result_items:
         content = item["content"]
         artifact = topic_editorial.get((item["editorial_topic_id"], content.id)) or editorial.get(
             content.id, {}
         )
         result.append(
-            TopicFeedItem(
-                content_id=content.id,
-                title=artifact.get("chinese_title") or content.title,
-                excerpt=artifact.get("chinese_summary") or content.excerpt,
-                source_name=item["source"].name,
-                url=content.canonical_url or content.original_url,
-                published_at=content.published_at,
-                discovered_at=content.discovered_at,
-                language=content.language,
-                topic_ids=[topic.id for topic in item["topics"]],
-                topic_names=[topic.name for topic in item["topics"]],
-                tags=artifact.get("tags_zh", []),
+            _to_topic_feed_item(
+                content,
+                item["source"],
+                artifact,
+                topics=item["topics"],
                 match_score=item["match"].score,
-                quality_tier=quality_tier(content),
-                reader_eligible=is_reader_eligible(content),
             )
         )
     return result
+
+
+def _explore_items(db: Session, limit: int) -> list[TopicFeedItem]:
+    rows = db.execute(
+        select(ContentItem, Source)
+        .join(Source, Source.id == ContentItem.source_id)
+        .order_by(
+            func.coalesce(ContentItem.published_at, ContentItem.discovered_at).desc(),
+            ContentItem.id.desc(),
+        )
+        .limit(max(limit * 6, limit))
+    ).all()
+    editorial = _editorial_map(db, {content.id for content, _source in rows})
+    items: list[TopicFeedItem] = []
+    for content, source in rows:
+        if not is_website_source(source) or not is_reader_eligible(content):
+            continue
+        artifact = editorial.get(content.id, {})
+        items.append(_to_topic_feed_item(content, source, artifact))
+        if len(items) >= limit:
+            break
+    return items
 
 
 def _forwarded_proto(request: Request) -> str:
@@ -489,7 +530,7 @@ def _clear_session_cookie(response: Response, request: Request) -> None:
 
 def _require_admin(user: User) -> User:
     if user.role != "admin":
-        raise HTTPException(403, "仅管理员可以管理账号")
+        raise HTTPException(403, "仅管理员可以执行该操作")
     return user
 
 
@@ -841,7 +882,7 @@ def topic_feed(
     db: Session = Depends(get_db),
 ):
     _topic_for_user(db, topic_id, user)
-    return _feed_items(db, user, topic_id, limit, include_enrichment=True)
+    return _feed_items(db, user, topic_id, limit, include_enrichment=True, curated=True)
 
 
 @app.get(
@@ -878,13 +919,10 @@ def topic_daily_report_document(
         report = collect_topic_daily_report(db, topic=topic, coverage_date=coverage_date)
     except ValueError as exc:
         raise HTTPException(404, str(exc)) from exc
-    editorial = _topic_daily_editorial(
-        db, topic, {story.content_item_id for story in report.stories}
-    )
     ordered_refs = [f"content:{story.content_item_id}" for story in report.stories]
     report = replace(
         report,
-        editorial=compose_topic_edition(topic.name, editorial, ordered_refs),
+        editorial=compose_topic_edition(topic.name, report.editorial or {}, ordered_refs),
     )
     return HTMLResponse(render_daily_report(report))
 
@@ -895,7 +933,201 @@ def for_you_feed(
     user: User = Depends(current_user),
     db: Session = Depends(get_db),
 ):
-    return _feed_items(db, user, None, limit)
+    return _feed_items(db, user, None, limit, curated=True)
+
+
+@app.get("/api/v1/explore", response_model=list[TopicFeedItem])
+def explore_feed(
+    limit: int = Query(default=50, ge=1, le=100),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    return _explore_items(db, limit)
+
+
+@app.get("/api/v1/contents/{content_id}", response_model=TopicFeedItem)
+def read_content_card(
+    content_id: int,
+    topic_id: int | None = Query(default=None),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    row = db.execute(
+        select(ContentItem, Source)
+        .join(Source, Source.id == ContentItem.source_id)
+        .where(ContentItem.id == content_id)
+    ).first()
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "内容不存在")
+    content, source = row
+    if not is_website_source(source) or not is_reader_eligible(content):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "内容不存在")
+    topics: list[InterestTopic] = []
+    artifact: dict = {}
+    if topic_id is not None:
+        topic = _topic_for_user(db, topic_id, user)
+        topics = [topic]
+        pair = {(topic.id, content.id)}
+        artifact = _topic_editorial_map(db, pair).get((topic.id, content.id), {})
+    artifact = artifact or _editorial_map(db, {content.id}).get(content.id, {})
+    return _to_topic_feed_item(content, source, artifact, topics=topics)
+
+
+def _search_hit_to_feed_item(
+    content: ContentItem,
+    source: Source,
+    artifact: dict,
+    topics: list[InterestTopic],
+    match_score: float = 0,
+) -> TopicFeedItem:
+    return _to_topic_feed_item(
+        content,
+        source,
+        artifact,
+        topics=topics,
+        match_score=match_score,
+    )
+
+
+@app.get("/api/v1/topics/{topic_id}/events", response_model=list[ReaderEventRead])
+def topic_events(
+    topic_id: int,
+    limit: int = Query(default=20, ge=1, le=50),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _topic_for_user(db, topic_id, user)
+    return [
+        ReaderEventRead.model_validate(item)
+        for item in list_reader_events(db, user, topic_id, limit=limit)
+    ]
+
+
+@app.get("/api/v1/topics/{topic_id}/events/{event_id}", response_model=ReaderEventRead)
+def topic_event_detail(
+    topic_id: int,
+    event_id: int,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _topic_for_user(db, topic_id, user)
+    payload = reader_event_detail(db, user, event_id, topic_id)
+    if payload is None:
+        raise HTTPException(404, "事件不存在")
+    return ReaderEventRead.model_validate(payload)
+
+
+@app.get("/api/v1/feed/events", response_model=list[ReaderEventRead])
+def for_you_events(
+    limit: int = Query(default=20, ge=1, le=50),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    return [
+        ReaderEventRead.model_validate(item)
+        for item in list_reader_events(db, user, None, limit=limit)
+    ]
+
+
+@app.get("/api/v1/feed/events/{event_id}", response_model=ReaderEventRead)
+def for_you_event_detail(
+    event_id: int,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    payload = reader_event_detail(db, user, event_id, None)
+    if payload is None:
+        raise HTTPException(404, "事件不存在")
+    return ReaderEventRead.model_validate(payload)
+
+
+@app.get("/api/v1/topics/{topic_id}/search", response_model=list[TopicFeedItem])
+def topic_search(
+    topic_id: int,
+    q: str = Query(min_length=1, max_length=120),
+    limit: int = Query(default=50, ge=1, le=50),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _topic_for_user(db, topic_id, user)
+    grouped: dict[int, dict] = {}
+    hits = search_topic_contents(db, user, topic_id, q, limit=limit * 3)
+    for topic, content, source, artifact in hits:
+        item = grouped.setdefault(
+            content.id,
+            {"content": content, "source": source, "artifact": artifact, "topics": []},
+        )
+        item["topics"].append(topic)
+        if not item["artifact"] and artifact:
+            item["artifact"] = artifact
+    items = [
+        _search_hit_to_feed_item(item["content"], item["source"], item["artifact"], item["topics"])
+        for item in grouped.values()
+    ]
+    items.sort(
+        key=lambda item: _aware_timestamp(item.published_at or item.discovered_at),
+        reverse=True,
+    )
+    return items[:limit]
+
+
+@app.get("/api/v1/feed/search", response_model=list[TopicFeedItem])
+def for_you_search(
+    q: str = Query(min_length=1, max_length=120),
+    limit: int = Query(default=50, ge=1, le=50),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    grouped: dict[int, dict] = {}
+    hits = search_topic_contents(db, user, None, q, limit=limit * 3)
+    for topic, content, source, artifact in hits:
+        item = grouped.setdefault(
+            content.id,
+            {"content": content, "source": source, "artifact": artifact, "topics": []},
+        )
+        item["topics"].append(topic)
+        if not item["artifact"] and artifact:
+            item["artifact"] = artifact
+    items = [
+        _search_hit_to_feed_item(item["content"], item["source"], item["artifact"], item["topics"])
+        for item in grouped.values()
+    ]
+    items.sort(
+        key=lambda item: _aware_timestamp(item.published_at or item.discovered_at),
+        reverse=True,
+    )
+    return items[:limit]
+
+
+@app.get("/api/v1/explore/search", response_model=list[TopicFeedItem])
+def explore_search(
+    q: str = Query(min_length=1, max_length=120),
+    limit: int = Query(default=50, ge=1, le=50),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    return [
+        _search_hit_to_feed_item(content, source, artifact, [])
+        for content, source, artifact in search_explore_contents(db, q, limit=limit)
+    ]
+
+
+@app.get("/api/v1/topics/{topic_id}/rss.xml")
+def topic_rss(
+    topic_id: int,
+    request: Request,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    topic = _topic_for_user(db, topic_id, user)
+    items = [
+        item.model_dump()
+        for item in _feed_items(db, user, topic_id, 50, include_enrichment=False, curated=True)
+        if item.reader_eligible
+    ]
+    self_link = str(request.url)
+    xml = render_topic_rss(topic=topic, items=items, self_link=self_link)
+    return Response(content=xml, media_type="application/rss+xml; charset=utf-8")
 
 
 @app.get("/api/v1/daily-reports", response_model=list[DailyReportHistoryItem])
@@ -1073,23 +1305,12 @@ def discover_topic_sources(
                 discovered_content_ids.append(content.id)
                 db.commit()
                 continue
-            if content is not None:
-                content = enrich_discovered_content_from_web(
-                    db, content=content, candidate=candidate
-                )
-                attach_discovered_match(
-                    db,
-                    topic=topic,
-                    content=content,
-                    candidate=candidate,
-                    window_start=collection_window_start,
-                    window_end=collection_window_end,
-                )
-                discovered_content_ids.append(content.id)
-                db.commit()
-                continue
-            if scrape_calls >= scrape_budget:
-                content, ingest_result = ingest_discovered_metadata(db, candidate=candidate)
+            content, ingest_result, scrape_needed = ingest_discovered_url_preferring_direct(
+                db,
+                candidate=candidate,
+                search_item=item,
+            )
+            if content is not None and not scrape_needed:
                 attach_discovered_match(
                     db,
                     topic=topic,
@@ -1100,7 +1321,24 @@ def discover_topic_sources(
                 )
                 discovered_content_ids.append(content.id)
                 ingested_count += int(ingest_result in {"new", "updated"})
-                metadata_only_count += int(ingest_result != "reused")
+                db.commit()
+                continue
+            if content is not None:
+                db.commit()
+            if scrape_calls >= scrape_budget:
+                if content is None:
+                    content, ingest_result = ingest_discovered_metadata(db, candidate=candidate)
+                    metadata_only_count += int(ingest_result != "reused")
+                attach_discovered_match(
+                    db,
+                    topic=topic,
+                    content=content,
+                    candidate=candidate,
+                    window_start=collection_window_start,
+                    window_end=collection_window_end,
+                )
+                discovered_content_ids.append(content.id)
+                ingested_count += int((ingest_result or "") in {"new", "updated"})
                 db.commit()
                 continue
             scrape_calls += 1
@@ -1176,6 +1414,11 @@ def discover_topic_sources(
         }
         topic.updated_at = datetime.now(UTC)
         db.commit()
+        try:
+            refresh_event_clusters(db)
+            db.commit()
+        except Exception:
+            db.rollback()
     except (FirecrawlError, MissingSecretError, RuntimeError, ValueError) as exc:
         run.status = "failed"
         run.error_code = str(exc)
@@ -1210,23 +1453,69 @@ def discover_topic_sources(
     )
 
 
+@app.post("/api/v1/sources/probe", response_model=SourceProbePreview)
+async def probe_source(
+    payload: SourceProbeRequest,
+    user: User = Depends(current_user),
+):
+    _require_admin(user)
+    try:
+        result = await probe_public_url(str(payload.start_url), observed_at=datetime.now(UTC))
+    except (ProbeFetchError, ValueError) as exc:
+        raise HTTPException(502, "该地址暂时无法探测") from exc
+    return SourceProbePreview.model_validate(probe_preview(result))
+
+
 @app.post("/api/v1/sources", response_model=SourceRead, status_code=status.HTTP_201_CREATED)
-def create_source(payload: SourceCreate, db: Session = Depends(get_db)):
+async def create_source(
+    payload: SourceCreate,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
     start_url = str(payload.start_url)
+    channel_type = payload.channel_type
+    parser_config = payload.parser_config
+    if payload.probe:
+        try:
+            probed = await probe_public_url(start_url, observed_at=datetime.now(UTC))
+            channel_type, start_url, parser_config = registration_from_probe(probed)
+        except ProbeFetchError as exc:
+            raise HTTPException(502, "该地址暂时无法探测") from exc
+        except ValueError as exc:
+            raise HTTPException(422, "未识别到可执行的采集路径") from exc
+    normalized_start_url = normalize_url(start_url)
+    existing = db.scalar(
+        select(Source).where(
+            Source.channel_type == channel_type,
+            Source.normalized_start_url == normalized_start_url,
+        )
+    )
+    if existing is not None:
+        if not is_website_source(existing) or not is_removed_from_catalog(existing):
+            raise HTTPException(409, "该网站来源已注册")
+        restore_website_source(existing)
+        if payload.name:
+            existing.name = payload.name.strip()
+        db.commit()
+        db.refresh(existing)
+        health = source_health_map(db, [existing]).get(existing.id, SourceHealth())
+        return _source_read(existing, health)
     source = Source(
-        catalog_id=payload.catalog_id,
-        name=payload.name.strip(),
-        channel_type=payload.channel_type,
+        catalog_id=payload.catalog_id or catalog_id_for_url(db, start_url),
+        name=display_name_for_url(start_url, payload.name),
+        channel_type=channel_type,
         start_url=start_url,
-        normalized_start_url=normalize_url(start_url),
+        normalized_start_url=normalized_start_url,
         fetch_interval_seconds=payload.fetch_interval_seconds,
-        parser_config=canonicalize_parser_config(payload.channel_type, payload.parser_config),
+        parser_config=canonicalize_parser_config(channel_type, parser_config),
         processing_config=payload.processing_config,
         source_region=payload.source_region,
         source_type=payload.source_type,
         default_language=payload.default_language,
         source_tags=payload.source_tags,
         source_external_id=payload.source_external_id,
+        is_enabled=True,
     )
     db.add(source)
     try:
@@ -1235,16 +1524,32 @@ def create_source(payload: SourceCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(409, "该网站来源已注册") from exc
     db.refresh(source)
-    return source
+    return _source_read(source, SourceHealth())
 
 
 @app.get("/api/v1/sources", response_model=list[SourceRead])
-def list_sources(db: Session = Depends(get_db)):
-    return serialize_sources(db, list(db.scalars(select(Source).order_by(Source.id))))
+def list_sources(
+    family: str = Query(default="all", pattern=r"^(all|website)$"),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
+    sources = (
+        website_sources(db)
+        if family == "website"
+        else list(db.scalars(select(Source).order_by(Source.id)))
+    )
+    return serialize_sources(db, sources)
 
 
 @app.patch("/api/v1/sources/{source_id}", response_model=SourceRead)
-def update_source(source_id: int, payload: SourceUpdate, db: Session = Depends(get_db)):
+def update_source(
+    source_id: int,
+    payload: SourceUpdate,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
     source = db.get(Source, source_id)
     if not source:
         raise HTTPException(404, "来源不存在")
@@ -1268,7 +1573,77 @@ def update_source(source_id: int, payload: SourceUpdate, db: Session = Depends(g
         db.rollback()
         raise HTTPException(409, "该渠道与入口地址已注册") from exc
     db.refresh(source)
-    return source
+    return _source_read(source, source_health_map(db, [source]).get(source.id, SourceHealth()))
+
+
+@app.delete("/api/v1/sources/{source_id}", response_model=SourceRetireResult)
+def delete_source(
+    source_id: int,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
+    source = db.get(Source, source_id)
+    if source is None:
+        raise HTTPException(404, "来源不存在")
+    try:
+        action = retire_website_source(db, source)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    db.commit()
+    return SourceRetireResult(deleted=int(action == "deleted"), hidden=int(action == "hidden"))
+
+
+@app.post("/api/v1/sources/delete-selected", response_model=SourceRetireResult)
+def delete_selected_sources(
+    payload: CrawlSelectedRequest,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
+    deleted = hidden = 0
+    for source_id in list(dict.fromkeys(payload.source_ids)):
+        source = db.get(Source, source_id)
+        if source is None:
+            raise HTTPException(404, "来源不存在")
+        try:
+            action = retire_website_source(db, source)
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        deleted += int(action == "deleted")
+        hidden += int(action == "hidden")
+    db.commit()
+    return SourceRetireResult(deleted=deleted, hidden=hidden)
+
+
+@app.post("/api/v1/sources/crawl-selected", response_model=list[CrawlAccepted], status_code=202)
+def crawl_selected_sources(
+    payload: CrawlSelectedRequest,
+    tasks: BackgroundTasks,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
+    accepted: list[CrawlAccepted] = []
+    for source_id in list(dict.fromkeys(payload.source_ids)):
+        source = db.get(Source, source_id)
+        if source is None or not is_website_source(source):
+            raise HTTPException(404, "来源不存在")
+        try:
+            run, created = queue_source_crawl(db, source)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        if created:
+            tasks.add_task(crawl_source, SessionLocal, source.id, run.id)
+        accepted.append(
+            CrawlAccepted(
+                run_id=run.id,
+                status=run.status,
+                coverage_date=run.coverage_date,
+                publication_timezone=run.publication_timezone,
+            )
+        )
+    return accepted
 
 
 @app.post("/api/v1/sources/{source_id}/crawl", response_model=CrawlAccepted, status_code=202)
@@ -1276,8 +1651,10 @@ def trigger_crawl(
     source_id: int,
     tasks: BackgroundTasks,
     coverage_date: date | None = Query(default=None),
+    user: User = Depends(current_user),
     db: Session = Depends(get_db),
 ):
+    _require_admin(user)
     source = db.get(Source, source_id)
     if not source:
         raise HTTPException(404, "来源不存在")
@@ -1303,7 +1680,12 @@ def trigger_crawl(
 
 
 @app.get("/api/v1/scheduler/due", response_model=list[SourceRead])
-def list_due_sources(limit: int = Query(default=100, ge=1, le=500), db: Session = Depends(get_db)):
+def list_due_sources(
+    limit: int = Query(default=100, ge=1, le=500),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
     return serialize_sources(db, due_sources(db, limit=limit))
 
 
@@ -1311,8 +1693,10 @@ def list_due_sources(limit: int = Query(default=100, ge=1, le=500), db: Session 
 def trigger_due_sources(
     tasks: BackgroundTasks,
     limit: int = Query(default=100, ge=1, le=500),
+    user: User = Depends(current_user),
     db: Session = Depends(get_db),
 ):
+    _require_admin(user)
     scheduled = create_due_runs(db, limit=limit)
     for item in scheduled:
         tasks.add_task(crawl_source, SessionLocal, item.source_id, item.run_id)
@@ -1320,7 +1704,12 @@ def trigger_due_sources(
 
 
 @app.get("/api/v1/crawl-runs/{run_id}", response_model=CrawlRunRead)
-def get_crawl_run(run_id: int, db: Session = Depends(get_db)):
+def get_crawl_run(
+    run_id: int,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
     run = db.get(CrawlRun, run_id)
     if not run:
         raise HTTPException(404, "抓取任务不存在")
@@ -1328,7 +1717,13 @@ def get_crawl_run(run_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/v1/crawl-runs/{run_id}/retry", response_model=CrawlAccepted, status_code=202)
-def retry_crawl_run(run_id: int, tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def retry_crawl_run(
+    run_id: int,
+    tasks: BackgroundTasks,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(user)
     run = db.get(CrawlRun, run_id)
     if not run:
         raise HTTPException(404, "抓取任务不存在")

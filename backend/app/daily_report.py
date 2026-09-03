@@ -21,9 +21,11 @@ from .models import (
     Event,
     EventMember,
     InterestTopic,
+    LLMProcessingResult,
     Source,
     TopicMatch,
 )
+from .reader_cards import build_reader_card
 
 REPORT_TIMEZONE = ZoneInfo("Asia/Shanghai")
 
@@ -184,6 +186,48 @@ def available_topic_report_dates(
     return sorted(counts.items(), reverse=True)
 
 
+def _content_editorial_map(session: Session, content_ids: set[int]) -> dict[int, dict]:
+    if not content_ids:
+        return {}
+    rows = session.scalars(
+        select(LLMProcessingResult)
+        .where(
+            LLMProcessingResult.subject_type == "content_item",
+            LLMProcessingResult.task_name == "content_editorial_zh",
+            LLMProcessingResult.status == "succeeded",
+            LLMProcessingResult.subject_key.in_([f"content:{item}" for item in content_ids]),
+        )
+        .order_by(LLMProcessingResult.id)
+    )
+    result: dict[int, dict] = {}
+    for row in rows:
+        try:
+            content_id = int(row.subject_key.split(":", 1)[1])
+        except (ValueError, IndexError):
+            continue
+        result[content_id] = row.output or {}
+    return result
+
+
+def topic_editorial_from_cards(
+    session: Session,
+    articles: list[tuple[ContentItem, Source]],
+) -> dict:
+    artifacts = _content_editorial_map(session, {content.id for content, _source in articles})
+    stories = []
+    for content, source in articles:
+        card = build_reader_card(content, source, artifacts.get(content.id))
+        stories.append(
+            {
+                "story_key": f"content:{content.id}",
+                "chinese_title": card["title"],
+                "chinese_summary": " ".join(card["paragraphs"]) or card["excerpt"] or "",
+                "tags": [{"label_zh": label} for label in card["tags"]],
+            }
+        )
+    return {"stories": stories}
+
+
 def collect_topic_daily_report(
     session: Session,
     *,
@@ -214,6 +258,11 @@ def collect_topic_daily_report(
         for content, source, _ in rows
     ]
     stories.sort(key=lambda item: (item.published_at, item.content_item_id), reverse=True)
+    by_id = {content.id: (content, source) for content, source, _match in rows}
+    editorial = topic_editorial_from_cards(
+        session,
+        [by_id[story.content_item_id] for story in stories if story.content_item_id in by_id],
+    )
     return DailyReportData(
         issue_date=coverage_date + timedelta(days=1),
         report_date=coverage_date,
@@ -230,6 +279,7 @@ def collect_topic_daily_report(
         never_run_source_count=0,
         data_cutoff=None,
         cluster_version=None,
+        editorial=editorial,
     )
 
 
@@ -442,14 +492,70 @@ def _reader_kicker(value: object, fallback: str = "") -> str:
     return text
 
 
-def _primary_tag(story: dict) -> str:
-    tags = story.get("tags") or []
-    if not tags:
+def _brief_lead(value: object, fallback: str = "", *, limit: int = 100) -> str:
+    text = _reader_kicker(value, fallback)
+    if not text:
         return ""
-    first = tags[0]
-    if isinstance(first, dict):
-        return str(first.get("label_zh") or "").strip()
-    return str(first).strip()
+    lead = re.split(r"(?<=[。！？])\s*", text, maxsplit=1)[0].strip()
+    if len(lead) > limit:
+        lead = lead[: limit - 1].rstrip("，,;；、 ") + "…"
+    return lead
+
+
+_SECTION_RULES = (
+    ("融资", ("融资", "吸金", "IPO", "上市")),
+    ("并购", ("收购", "并购")),
+    ("人事", ("加入", "加盟", "任命", "出任", "离职", "辞职")),
+    ("监管", ("监管", "新规", "政策")),
+    ("产品", ("新品", "开售", "上线", "发布产品", "推出")),
+)
+
+
+def _tag_labels(story: dict) -> list[str]:
+    labels = []
+    for tag in story.get("tags") or []:
+        if isinstance(tag, dict):
+            label = str(tag.get("label_zh") or "").strip()
+        else:
+            label = str(tag).strip()
+        if label:
+            labels.append(label)
+    return labels
+
+
+def _section_label(story: dict) -> str:
+    haystack = " ".join(
+        [
+            str(story.get("chinese_title") or ""),
+            str(story.get("chinese_summary") or ""),
+            *_tag_labels(story),
+        ]
+    )
+    for title, keys in _SECTION_RULES:
+        if any(key in haystack for key in keys):
+            return title
+    return "要闻"
+
+
+def _issue_deck(stories: list[dict], topic_name: str, *, max_items: int = 3) -> str:
+    titles = []
+    for item in stories[:max_items]:
+        title = _reader_kicker(item.get("chinese_title"))
+        if title and title not in titles:
+            titles.append(title)
+    return "；".join(titles) if titles else topic_name
+
+
+def _issue_lead(stories: list[dict], *, max_items: int = 3) -> tuple[str, list[str]]:
+    parts: list[str] = []
+    refs: list[str] = []
+    for item in stories[:max_items]:
+        sentence = _brief_lead(item.get("chinese_summary") or item.get("chinese_title"))
+        if not sentence:
+            continue
+        parts.append(sentence)
+        refs.append(str(item["story_key"]))
+    return "".join(parts), refs
 
 
 def compose_topic_edition(topic_name: str, editorial: dict, ordered_refs: list[str]) -> dict:
@@ -464,30 +570,21 @@ def compose_topic_edition(topic_name: str, editorial: dict, ordered_refs: list[s
             "sections": [],
             "stories": stories,
         }
-    top = ordered[0]
     groups: dict[str, list[str]] = {}
     section_order: list[str] = []
-    tagged = False
     for item in ordered:
-        label = _primary_tag(item)
-        tagged = tagged or bool(label)
-        label = label or "要闻"
+        label = _section_label(item)
         if label not in groups:
             groups[label] = []
             section_order.append(label)
         groups[label].append(str(item["story_key"]))
-    if not tagged and len(ordered) > 1:
-        groups = {
-            "要闻": [str(ordered[0]["story_key"])],
-            "续闻": [str(item["story_key"]) for item in ordered[1:]],
-        }
-        section_order = ["要闻", "续闻"]
+    lead_text, lead_refs = _issue_lead(ordered)
     return {
         **editorial,
         "daily_lead": {
-            "deck": _reader_kicker(top.get("chinese_title"), topic_name),
-            "text": _reader_kicker(top.get("chinese_summary")),
-            "story_refs": [str(top["story_key"])],
+            "deck": _issue_deck(ordered, topic_name),
+            "text": lead_text,
+            "story_refs": lead_refs,
         },
         "sections": [
             {"title": title, "intro": "", "story_refs": groups[title]}

@@ -9,7 +9,11 @@ import httpx
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from .content_quality import quality_tier
+from .content_quality import MIN_PARTIAL_BODY_CHARS, quality_tier
+from .execution_engines import (
+    ExecutionEngineConfigurationError,
+    execution_engine_for_source,
+)
 from .firecrawl import FirecrawlError
 from .models import (
     ContentItem,
@@ -75,6 +79,50 @@ def enrichment_retry_due(content: ContentItem, now: datetime | None = None) -> b
 def _origin(url: str) -> str:
     parts = urlsplit(url)
     return urlunsplit((parts.scheme, parts.netloc, "/", "", ""))
+
+
+def _host_key(url: str) -> str:
+    host = (urlsplit(url).hostname or "").lower()
+    return host[4:] if host.startswith("www.") else host
+
+
+_ENABLED_SOURCE_PRIORITY = {
+    "rss": 0,
+    "api": 1,
+    "third_party_feed": 2,
+    "web": 3,
+}
+
+
+def enabled_source_for_url(db: Session, url: str) -> Source | None:
+    """Reuse an enabled long-term source on the same host; never probe the whole site."""
+    host = _host_key(url)
+    if not host:
+        return None
+    matched: list[Source] = []
+    for source in db.scalars(select(Source).where(Source.is_enabled.is_(True))):
+        if _host_key(source.start_url) != host:
+            continue
+        method = str((source.parser_config or {}).get("discovery_method") or "html")
+        if method == "user_topic":
+            continue
+        matched.append(source)
+    if not matched:
+        return None
+    matched.sort(key=lambda item: (_ENABLED_SOURCE_PRIORITY.get(item.channel_type, 9), item.id))
+    return matched[0]
+
+
+def source_for_discovered_url(db: Session, url: str, metadata: dict) -> Source:
+    existing = existing_content_for_url(db, url)
+    if existing is not None:
+        source = db.get(Source, existing.source_id)
+        if source is not None:
+            return source
+    enabled = enabled_source_for_url(db, url)
+    if enabled is not None:
+        return enabled
+    return _source_for_page(db, url, metadata)
 
 
 def _source_for_page(db: Session, url: str, metadata: dict) -> Source:
@@ -144,6 +192,145 @@ def _generic_web_config(source: Source) -> dict:
     }
 
 
+def _extract_direct_article(source: Source, html: str, url: str) -> dict:
+    config = _generic_web_config(source)
+    method = str((source.parser_config or {}).get("discovery_method") or "html")
+    if source.is_enabled and method != "user_topic":
+        try:
+            engine = execution_engine_for_source(source)
+            try:
+                return engine.extract_detail(html, url, config)
+            except (ContentFormError, TypeError, ValueError):
+                pass
+        except ExecutionEngineConfigurationError:
+            pass
+    return extract_article(html, url, config)
+
+
+def _direct_body_chars(extracted: dict) -> int:
+    return len(str(extracted.get("body") or "").strip())
+
+
+def _direct_fetch_complete(extracted: dict) -> bool:
+    return (
+        extracted.get("published_at") is not None
+        and _direct_body_chars(extracted) >= MIN_PARTIAL_BODY_CHARS
+    )
+
+
+def _direct_fetch_worth_ingesting(extracted: dict, seed: dict) -> bool:
+    if extracted.get("published_at") is not None:
+        return True
+    body_chars = _direct_body_chars(extracted)
+    return body_chars >= 120 and body_chars > _direct_body_chars(seed)
+
+
+def _mark_direct_completeness(extracted: dict) -> dict:
+    result = dict(extracted)
+    body_chars = _direct_body_chars(result)
+    if result.get("published_at") is None:
+        return result
+    if body_chars >= 400:
+        result["content_completeness"] = "full"
+    elif body_chars >= MIN_PARTIAL_BODY_CHARS:
+        result["content_completeness"] = "partial"
+    return result
+
+
+def _search_seed_article(url: str, search_item: dict, candidate: TopicSourceCandidate) -> dict:
+    title = str(search_item.get("title") or candidate.title or url).strip()
+    description = str(search_item.get("description") or candidate.description or "").strip()
+    return {
+        "title": title or url,
+        "canonical_url": url,
+        "original_url": url,
+        "content_url": url,
+        "author": None,
+        "published_at": None,
+        "updated_at": None,
+        "external_item_id": None,
+        "body": description,
+        "description": description,
+        "content_type": "article",
+        "topics": [],
+        "media": [],
+        "content_completeness": "metadata_only",
+        "validation_warnings": [],
+    }
+
+
+def _existing_as_article(content: ContentItem, url: str, fallback_title: str) -> dict:
+    return {
+        "title": content.title or fallback_title or url,
+        "canonical_url": url,
+        "original_url": content.original_url or url,
+        "content_url": url,
+        "author": content.author,
+        "published_at": content.published_at,
+        "updated_at": content.source_updated_at,
+        "external_item_id": content.external_id,
+        "body": content.body or content.excerpt or "",
+        "description": content.excerpt or "",
+        "content_type": content.content_type or "article",
+        "topics": content.topics or [],
+        "media": content.media or [],
+        "content_completeness": "full" if content.body else "metadata_only",
+        "validation_warnings": list((content.quality or {}).get("validation_warnings") or []),
+    }
+
+
+def ingest_discovered_url_preferring_direct(
+    db: Session,
+    *,
+    candidate: TopicSourceCandidate,
+    search_item: dict,
+) -> tuple[ContentItem | None, str | None, bool]:
+    """Fetch one Search URL cheaply; return whether Firecrawl Scrape is still required."""
+    url = normalize_url(candidate.canonical_url)
+    existing = existing_content_for_url(db, url)
+    if existing is not None and not content_needs_discovery_enrichment(existing):
+        candidate.source_id = existing.source_id
+        candidate.last_checked_at = datetime.now(UTC)
+        return existing, "reused", False
+    if existing is not None:
+        content = enrich_discovered_content_from_web(
+            db, content=existing, candidate=candidate
+        )
+        return content, "updated", content_needs_discovery_enrichment(content)
+
+    source = source_for_discovered_url(db, url, {"title": search_item.get("title")})
+    candidate.source_id = source.id
+    candidate.last_checked_at = datetime.now(UTC)
+    run = CrawlRun(source_id=source.id, trigger="topic_discovery_direct", status="running")
+    db.add(run)
+    db.flush()
+    seed = _search_seed_article(url, search_item, candidate)
+    extracted = _web_enrichment_detail(db, source=source, run=run, url=url, article=seed)
+    if not _direct_fetch_worth_ingesting(extracted, seed):
+        run.status = "succeeded"
+        run.finished_at = datetime.now(UTC)
+        run.fetched_count = 1
+        run.skipped_count = 1
+        db.flush()
+        return None, None, True
+
+    extracted = _mark_direct_completeness(extracted)
+    result = ingest_article(db, source, run, extracted)
+    run.status = "succeeded"
+    run.finished_at = datetime.now(UTC)
+    run.fetched_count = 1
+    run.new_count = int(result == "new")
+    run.updated_count = int(result == "updated")
+    run.skipped_count = int(result == "skipped")
+    content = existing_content_for_url(db, url)
+    if content is None:
+        raise RuntimeError("discovered_content_missing_after_direct_ingest")
+    return content, result, (
+        not _direct_fetch_complete(extracted)
+        or content_needs_discovery_enrichment(content)
+    )
+
+
 def _web_enrichment_detail(
     db: Session,
     *,
@@ -178,7 +365,7 @@ def _web_enrichment_detail(
             )
             response.raise_for_status()
             try:
-                web_article = extract_article(response.text, str(response.url), config)
+                web_article = _extract_direct_article(source, response.text, str(response.url))
             except ContentFormError:
                 published_at, origin = extract_page_publication_date(
                     response.text, str(response.url), config
@@ -284,7 +471,7 @@ def ingest_discovered_page(
         or search_item.get("description")
         or ""
     ).strip()
-    source = _source_for_page(db, url, metadata)
+    source = source_for_discovered_url(db, url, metadata)
     candidate.source_id = source.id
     candidate.last_checked_at = datetime.now(UTC)
     run = CrawlRun(source_id=source.id, trigger="topic_discovery", status="running")
@@ -324,7 +511,12 @@ def ingest_discovered_page(
         "media": [],
         "content_completeness": "full" if len(markdown) >= 400 else "partial",
     }
-    if extracted["published_at"] is None or len(markdown) < 400:
+    if existing is not None:
+        extracted = merge_web_enrichment_detail(
+            _existing_as_article(existing, url, title),
+            extracted,
+        )
+    if extracted["published_at"] is None or len(str(extracted.get("body") or "")) < 400:
         extracted = _web_enrichment_detail(db, source=source, run=run, url=url, article=extracted)
     result = ingest_article(db, source, run, extracted, snapshot.id)
     run.status = "succeeded"

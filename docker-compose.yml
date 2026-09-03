@@ -2,6 +2,7 @@ services:
   backend:
     build:
       context: ./backend
+    image: navigate-backend:local
     env_file:
       - .env
     environment:
@@ -21,6 +22,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    restart: unless-stopped
+
+  crawler:
+    build:
+      context: ./backend
+    image: navigate-backend:local
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NAVIGATE_DATABASE_URL: sqlite:////data/navigate.db
+      NAVIGATE_SKIP_MIGRATIONS: "1"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./backend/data:/data
+    command:
+      [
+        "python",
+        "-m",
+        "scripts.run_due_sources",
+        "--watch",
+        "--poll-seconds",
+        "60",
+      ]
     restart: unless-stopped
 
   web:

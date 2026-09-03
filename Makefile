@@ -1,4 +1,4 @@
-.PHONY: setup check-secrets migrate seed-catalog docker-up docker-down docker-logs probe-source crawl-catalog crawl-due crawl-scheduler process-content classify-beauty classify-beauty-llm rebuild-strict-duplicates sync-beauty-domain extract-entities extract-entities-llm review-entity-candidates add-event-constraint rebuild-events score-content prepare-frontend-editorials frontend-snapshot daily-report daily-report-zh backend frontend test check
+.PHONY: setup check-secrets migrate seed-catalog docker-up docker-down docker-logs probe-source crawl-catalog crawl-due crawl-scheduler process-content classify-beauty classify-beauty-llm rebuild-strict-duplicates sync-beauty-domain extract-entities extract-entities-llm review-entity-candidates add-event-constraint rebuild-events score-content daily-report daily-report-zh backend frontend test check
 
 setup:
 	uv sync --project backend --dev
@@ -57,12 +57,6 @@ rebuild-events:
 
 score-content:
 	@echo "Usage: cd backend && uv run python -m scripts.score_content --domain beauty --as-of 2026-08-30T00:00:00+08:00 [--apply]"
-
-frontend-snapshot:
-	cd backend && uv run python -m scripts.export_frontend_snapshot --domain beauty
-
-prepare-frontend-editorials:
-	cd backend && uv run python -m scripts.prepare_frontend_editorials --domain beauty --apply
 
 daily-report:
 	cd backend && uv run python -m scripts.generate_daily_report --domain beauty

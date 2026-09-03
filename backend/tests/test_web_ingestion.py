@@ -16,6 +16,7 @@ from app.models import (
 from app.web_ingestion import (
     api_needs_web_fallback,
     api_within_publication_window,
+    article_limit,
     discover_article_urls,
     extract_article,
     extract_json_article,
@@ -428,3 +429,11 @@ def test_source_window_is_seven_days_initial_then_one_day(session_factory):
         )
         assert ingest_article(session, source, run, extracted) == "new"
         assert source_publication_window_days(session, source) == 1
+        assert source_publication_window_days(session, source, trigger="manual") == 7
+
+
+def test_manual_crawl_floors_article_limit_and_keeps_schedule_limit():
+    assert article_limit({"max_articles": 1}) == 1
+    assert article_limit({"max_articles": 1}, trigger="schedule") == 1
+    assert article_limit({"max_articles": 1}, trigger="manual") == 10
+    assert article_limit({"max_articles": 20}, trigger="manual") == 20

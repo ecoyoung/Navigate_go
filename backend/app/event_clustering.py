@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import re
 import unicodedata
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -12,6 +11,13 @@ from pathlib import Path
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .event_signature import (
+    amount_conflict,
+    item_signature,
+    lead_text,
+    signature_core_match,
+    signature_jaccard,
+)
 from .models import (
     ContentItem,
     Event,
@@ -126,37 +132,38 @@ def _jaccard(left: set[str], right: set[str]) -> float | None:
     return len(left & right) / len(union)
 
 
-def _numbers(value: str | None) -> set[str]:
-    return set(re.findall(r"(?<![\w])\d+(?:[.,]\d+)?%?", value or ""))
-
-
-def _lead_text(item: ContentItem, chars: int) -> str:
-    return (item.excerpt or item.body or "")[:chars]
-
-
 def pair_score(left: ContentItem, right: ContentItem, config: dict) -> PairScore:
     if left.id == right.duplicate_of_id or right.id == left.duplicate_of_id:
         return PairScore(1.0, {"exact_duplicate": True})
     ngram_size = int(config["title_ngram_size"])
     lead_chars = int(config["lead_text_chars"])
-    title = _jaccard(_ngrams(left.title, ngram_size), _ngrams(right.title, ngram_size)) or 0.0
+    left_signature = item_signature(left, lead_chars=lead_chars)
+    right_signature = item_signature(right, lead_chars=lead_chars)
+    title = _jaccard(
+        _ngrams(left_signature.title, ngram_size),
+        _ngrams(right_signature.title, ngram_size),
+    ) or 0.0
     lead = _jaccard(
-        _ngrams(_lead_text(left, lead_chars), ngram_size),
-        _ngrams(_lead_text(right, lead_chars), ngram_size),
+        _ngrams(lead_text(left, lead_chars), ngram_size),
+        _ngrams(lead_text(right, lead_chars), ngram_size),
     )
     topics = _jaccard(
         {_normalized_text(str(item)) for item in left.topics if _normalized_text(str(item))},
         {_normalized_text(str(item)) for item in right.topics if _normalized_text(str(item))},
     )
-    left_numbers = _numbers(f"{left.title} {_lead_text(left, lead_chars)}")
-    right_numbers = _numbers(f"{right.title} {_lead_text(right, lead_chars)}")
-    number_score = _jaccard(left_numbers, right_numbers)
-    number_conflict = bool(left_numbers and right_numbers and not left_numbers & right_numbers)
+    signature = signature_jaccard(left_signature, right_signature)
+    core_match = signature_core_match(left_signature, right_signature)
+    conflict = amount_conflict(left_signature.amounts, right_signature.amounts)
+    if left_signature.amounts and right_signature.amounts:
+        number_score = 0.0 if conflict else 1.0
+    else:
+        number_score = None
     hours = abs((_effective_at(left) - _effective_at(right)).total_seconds()) / 3600
     window = float(config["candidate_window_hours"])
     time_score = max(0.0, 1.0 - hours / window)
     raw_signals = {
         "title": title,
+        "signature": signature,
         "lead_text": lead,
         "topics": topics,
         "numbers": number_score,
@@ -166,17 +173,21 @@ def pair_score(left: ContentItem, right: ContentItem, config: dict) -> PairScore
     available = {
         key: value for key, value in raw_signals.items() if value is not None and key in weights
     }
-    weight_total = sum(float(weights[key]) for key in available)
+    weight_total = sum(float(weights[key]) for key in available) or 1.0
     score = sum(float(weights[key]) * value for key, value in available.items()) / weight_total
-    if number_conflict:
+    if conflict:
         score = min(score, float(config["auto_match_threshold"]) - 0.01)
+    elif core_match:
+        score = max(score, float(config["auto_match_threshold"]))
     signals = {
         **{
             key: round(value, 4) if value is not None else None
             for key, value in raw_signals.items()
         },
         "hours_apart": round(hours, 2),
-        "number_conflict": number_conflict,
+        "number_conflict": conflict,
+        "signature_core_match": core_match,
+        "shared_distinctive": sorted(left_signature.distinctive & right_signature.distinctive),
     }
     return PairScore(round(max(0.0, min(1.0, score)), 6), signals)
 
@@ -510,3 +521,9 @@ def apply_cluster_plan(session: Session, plan: ClusterPlan) -> ClusterApplyResul
         len(plan.review_candidates),
         False,
     )
+
+
+def refresh_event_clusters(session: Session, config: dict | None = None) -> ClusterApplyResult:
+    plan = build_cluster_plan(session, config)
+    return apply_cluster_plan(session, plan)
+

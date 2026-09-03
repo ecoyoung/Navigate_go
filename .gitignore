@@ -15,3 +15,5 @@ frontend/.wrangler/
 *.db
 *.db-shm
 *.db-wal
+frontend/.vinext/
+frontend/.openai/

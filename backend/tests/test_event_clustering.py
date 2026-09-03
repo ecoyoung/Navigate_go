@@ -287,3 +287,87 @@ def test_legacy_processor_can_be_projected_into_named_domain(session_factory):
         assert assignment.domain_id == domain.id
         assert assignment.input_content_hash == content.content_hash
         assert assignment.decision == "include"
+
+
+def test_bilingual_same_story_merges_and_different_event_stays_out(session_factory):
+    with session_factory() as session:
+        zh_source, zh_run = add_source(session, "China Wire")
+        en_source, en_run = add_source(session, "Global Desk")
+        now = datetime(2026, 9, 2, 8, tzinfo=UTC)
+        zh = ingest(
+            session,
+            zh_source,
+            zh_run,
+            suffix="acme-zh",
+            title="Acme 以 20 亿美元收购 Nova",
+            body="Acme 签署协议，以 20 亿美元收购 Nova，交易将于年内完成。" * 8,
+            published_at=now,
+        )
+        en = ingest(
+            session,
+            en_source,
+            en_run,
+            suffix="acme-en",
+            title="Acme acquires Nova in two billion dollar deal",
+            body="Acme signed an agreement to acquire Nova in a two billion dollar deal. " * 8,
+            published_at=now + timedelta(hours=3),
+        )
+        unrelated = ingest(
+            session,
+            zh_source,
+            zh_run,
+            suffix="acme-launch",
+            title="Acme 发布新款家用音频设备",
+            body="Acme 推出一款新的家用音频设备，并开始零售铺货。" * 8,
+            published_at=now + timedelta(hours=4),
+        )
+        session.commit()
+
+        plan = build_cluster_plan(session)
+        paired = next(cluster for cluster in plan.clusters if len(cluster.items) == 2)
+        assert {item.id for item in paired.items} == {zh.id, en.id}
+        unrelated_cluster = next(
+            cluster
+            for cluster in plan.clusters
+            if unrelated.id in {item.id for item in cluster.items}
+        )
+        assert unrelated_cluster.items == [unrelated]
+        apply_cluster_plan(session, plan)
+        session.commit()
+        members = list(session.scalars(select(EventMember).where(EventMember.is_active.is_(True))))
+        grouped = {}
+        for member in members:
+            grouped.setdefault(member.event_id, set()).add(member.content_item_id)
+        assert {zh.id, en.id} in grouped.values()
+
+
+def test_same_story_with_source_suffix_and_traditional_chinese_merges(session_factory):
+    with session_factory() as session:
+        first_source, first_run = add_source(session, "Office News")
+        second_source, second_run = add_source(session, "Overseas Desk")
+        now = datetime(2026, 9, 1, 2, tzinfo=UTC)
+        first = ingest(
+            session,
+            first_source,
+            first_run,
+            suffix="summit-a",
+            title=(
+                "副總統為全球AI高峰會錄影致詞　盼攜手打造安全、可信賴且以人為本的AI"
+                "-總統府新聞｜中華民國總統府"
+            ),
+            body="副总统以录影方式为全球AI高峰会致词，强调主权人工智慧与机器人。" * 8,
+            published_at=now,
+        )
+        second = ingest(
+            session,
+            second_source,
+            second_run,
+            suffix="summit-b",
+            title="副總統為全球AI高峰會錄影致詞　盼攜手打造安全、可信賴且以人為本的AI|新創臺灣",
+            body="副总统以录影方式为全球AI高峰会致词，强调主权人工智慧与机器人。" * 8,
+            published_at=now + timedelta(hours=1),
+        )
+        session.commit()
+        plan = build_cluster_plan(session)
+        assert len(plan.clusters) == 1
+        assert {item.id for item in plan.clusters[0].items} == {first.id, second.id}

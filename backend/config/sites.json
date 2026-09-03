@@ -22,7 +22,7 @@
         "body_selector": ".paywall .module.rich-text .container.boxed.text",
         "author_selector": ".author-list .author",
         "date_selector": ".date.desktop-only",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "retry_attempts": 2,
         "access_level": "public"
@@ -47,7 +47,7 @@
       "crawl_strategy": "browser",
       "parser_config": {
         "article_url_pattern": "^https://www\\.beautyindependent\\.com/(?!premium|category|tag|author)[^/]+/$",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -71,7 +71,7 @@
       "crawl_strategy": "html",
       "parser_config": {
         "article_url_pattern": "^https://www\\.glossy\\.co/beauty/",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -95,7 +95,7 @@
       "crawl_strategy": "metadata_only",
       "parser_config": {
         "article_url_pattern": "^https://wwd\\.com/beauty-industry-news/(?:fragrance|color-cosmetics|hair|beauty-features|skin-care|wellness|body-care|products)/.+",
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "subscriber"
       },
@@ -119,7 +119,7 @@
       "crawl_strategy": "html",
       "parser_config": {
         "article_url_pattern": "^https://www\\.vogue\\.com/article/",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "partial"
       },
@@ -143,7 +143,7 @@
       "crawl_strategy": "unavailable",
       "skip_reason": "发布方已关闭 CosmeticsDesign 站点，主页和 Headlines 当前返回 410；仅保留历史目录记录。",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -172,7 +172,7 @@
         "date_selector": ".header-date span",
         "tag_selector": ".article-rubtitre a",
         "publication_timezone": "Europe/Paris",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 1.0,
         "access_level": "public",
         "content_completeness": "full"
@@ -196,7 +196,7 @@
       ],
       "crawl_strategy": "browser",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "public"
       },
@@ -219,7 +219,7 @@
       "crawl_strategy": "browser",
       "parser_config": {
         "article_url_pattern": "^https://www\\.happi\\.com/breaking-news/",
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "public"
       },
@@ -249,7 +249,7 @@
       ],
       "crawl_strategy": "html",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -273,7 +273,7 @@
       "crawl_strategy": "html",
       "parser_config": {
         "link_selector": ".block-companies a[href]",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "subscriber"
       },
@@ -297,7 +297,7 @@
       "crawl_strategy": "metadata_only",
       "parser_config": {
         "article_url_pattern": "^https://www\\.businessoffashion\\.com/articles/beauty/",
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "subscriber"
       },
@@ -321,7 +321,7 @@
       "crawl_strategy": "html",
       "parser_config": {
         "article_url_pattern": "^https://www\\.allure\\.com/story/",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -345,7 +345,7 @@
       "crawl_strategy": "blocked",
       "skip_reason": "Byrdie robots/站点声明禁止未经书面许可的自动抓取、数据挖掘和创建数据集。",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -385,7 +385,7 @@
       ],
       "crawl_strategy": "html",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -410,7 +410,7 @@
       "parser_config": {
         "link_selector": "a[href]",
         "article_url_pattern": "^https://sokoglam\\.com/blogs/theklog/[^/?#]+$",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -443,7 +443,7 @@
       "parser_config": {
         "discovery_method": "sitemap",
         "article_url_pattern": "^https://www\\.globalcosmeticsnews\\.com/.+/$",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 1.0,
         "access_level": "public",
         "roundup_keywords": [
@@ -471,7 +471,7 @@
       "crawl_strategy": "feed",
       "parser_config": {
         "discovery_method": "feed",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "partial"
       },
@@ -496,7 +496,7 @@
       "parser_config": {
         "article_url_pattern": "^https://www\\.hzpb\\.com\\.cn/ldcms/zixun/\\d+\\.html$",
         "body_selector": ".anim.fadeIn",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -530,7 +530,7 @@
         "article_url_pattern": "^https://www\\.c2cc\\.cn/news/\\d{8}\\.html$",
         "title_selector": "#showTitle, .show-title",
         "body_selector": "#articleDetail, .article-detail",
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 2,
         "http_timeout_seconds": 25,
         "access_level": "public"
@@ -557,7 +557,7 @@
         "article_url_pattern": "^https://www\\.jumeili\\.cn/news/view/\\d+\\.html$",
         "body_selector": ".entry",
         "min_content_chars": 100,
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "partial"
       },
@@ -586,7 +586,7 @@
         "article_url_template": "/Details.aspx?id={Id}&type={article_Type}",
         "title_selector": ".new-word h2",
         "body_selector": ".new-word",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -633,7 +633,7 @@
         "link_selector": "a[href]",
         "article_url_pattern": "^https://www\\.pinguan\\.com/article/content/\\d+\\.html$",
         "body_selector": ".main_con",
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "public"
       },
@@ -688,7 +688,7 @@
         "link_selector": "a[href]",
         "article_url_pattern": "^https://www\\.cbndata\\.com/information/\\d+(?:\\?.*)?$",
         "body_selector": "section.content",
-        "max_articles": 1,
+        "max_articles": 10,
         "candidate_scan_limit": 20,
         "request_delay_seconds": 0.5,
         "access_level": "public"
@@ -734,7 +734,7 @@
         "json_canonical_url_template": "https://www.iresearch.com.cn/report/detail?id={id}",
         "content_type": "report",
         "min_content_chars": 80,
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "partial"
       },
@@ -768,7 +768,7 @@
         "article_url_pattern": "^https://www\\.mktindex\\.com/research/notebook/article_\\d+$",
         "title_selector": "#notebook h1",
         "body_selector": "#notebook",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "partial"
       },
@@ -799,7 +799,7 @@
       "crawl_strategy": "blocked",
       "skip_reason": "robots.txt 明确禁止报告、热点和详情正文路径；公开 sitemap 仅保留实体 URL 元数据。",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "partial"
       },
@@ -829,7 +829,7 @@
       ],
       "crawl_strategy": "browser",
       "parser_config": {
-        "max_articles": 1,
+        "max_articles": 10,
         "retry_attempts": 1,
         "access_level": "public"
       },
@@ -876,7 +876,7 @@
       "parser_config": {
         "discovery_method": "feed",
         "ingest_feed_content": true,
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -922,7 +922,7 @@
       "crawl_strategy": "html",
       "parser_config": {
         "article_url_pattern": "^https://www\\.jiemian\\.com/article/\\d+\\.html$",
-        "max_articles": 1,
+        "max_articles": 10,
         "request_delay_seconds": 0.5,
         "access_level": "public"
       },
@@ -971,7 +971,7 @@
         "link_selector": "a[href]",
         "article_url_pattern": "^https://www\\.yicai\\.com/news/\\d+\\.html$",
         "body_selector": ".m-txt",
-        "max_articles": 1,
+        "max_articles": 10,
         "candidate_scan_limit": 20,
         "request_delay_seconds": 0.5,
         "access_level": "public"

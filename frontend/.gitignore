@@ -34,3 +34,5 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+/.vinext/
+/.openai/

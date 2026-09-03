@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -9,6 +10,8 @@ from .web_ingestion import create_crawl_run
 
 CIRCUIT_FAILURE_THRESHOLD = 3
 CIRCUIT_COOLDOWN = timedelta(hours=6)
+SCHEDULE_TIMEZONE = ZoneInfo("Asia/Shanghai")
+DAILY_SLOT_TIMES = (time(9, 30), time(18, 0))
 
 
 @dataclass(frozen=True)
@@ -24,21 +27,55 @@ class SourceHealth:
     consecutive_failures: int = 0
     circuit_open: bool = False
     last_finished_at: datetime | None = None
+    last_fetched_count: int = 0
+    last_new_count: int = 0
+    last_skipped_count: int = 0
+    last_rejected_count: int = 0
+    last_error_summary: str | None = None
 
 
 def _as_utc(value: datetime) -> datetime:
     return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
+def current_schedule_slot_start(now: datetime) -> datetime:
+    """Most recent Beijing 09:30/18:00 slot that has already started, as UTC."""
+    local = _as_utc(now).astimezone(SCHEDULE_TIMEZONE)
+    started: list[datetime] = []
+    for day_offset in range(0, 2):
+        day = local.date() - timedelta(days=day_offset)
+        for slot in DAILY_SLOT_TIMES:
+            candidate = datetime.combine(day, slot, tzinfo=SCHEDULE_TIMEZONE)
+            if candidate <= local:
+                started.append(candidate)
+    if not started:
+        raise RuntimeError("schedule_slot_missing")
+    return max(started).astimezone(UTC)
+
+
+def next_schedule_slot_start(now: datetime) -> datetime:
+    local = _as_utc(now).astimezone(SCHEDULE_TIMEZONE)
+    for day_offset in range(0, 2):
+        day = local.date() + timedelta(days=day_offset)
+        for slot in DAILY_SLOT_TIMES:
+            candidate = datetime.combine(day, slot, tzinfo=SCHEDULE_TIMEZONE)
+            if candidate > local:
+                return candidate.astimezone(UTC)
+    raise RuntimeError("schedule_slot_missing")
+
+
 def source_is_due(source: Source, last_started_at: datetime | None, now: datetime) -> bool:
     if not source.is_enabled:
         return False
-    strategy = str((source.parser_config or {}).get("crawl_strategy") or "")
+    config = source.parser_config or {}
+    strategy = str(config.get("crawl_strategy") or "")
     if strategy in {"blocked", "unavailable"}:
+        return False
+    if str(config.get("discovery_method") or "") == "user_topic":
         return False
     if last_started_at is None:
         return True
-    return _as_utc(last_started_at) + timedelta(seconds=source.fetch_interval_seconds) <= now
+    return _as_utc(last_started_at) < current_schedule_slot_start(now)
 
 
 def _recent_runs(session: Session, source_id: int, limit: int = 5) -> list[CrawlRun]:
@@ -89,6 +126,11 @@ def summarize_source_health(
         consecutive_failures=consecutive_failures(runs),
         circuit_open=circuit_is_open(runs, effective_now),
         last_finished_at=latest.finished_at,
+        last_fetched_count=latest.fetched_count,
+        last_new_count=latest.new_count,
+        last_skipped_count=latest.skipped_count,
+        last_rejected_count=latest.rejected_count,
+        last_error_summary=latest.error_summary,
     )
 
 

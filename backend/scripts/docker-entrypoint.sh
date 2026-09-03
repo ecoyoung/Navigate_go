@@ -15,5 +15,10 @@ if [ -n "${NAVIGATE_PUBLIC_ORIGIN:-}" ]; then
   esac
 fi
 
-alembic upgrade head
+if [ "${NAVIGATE_SKIP_MIGRATIONS:-}" != "1" ]; then
+  alembic upgrade head
+fi
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000

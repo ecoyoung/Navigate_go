@@ -32,11 +32,40 @@ def _reject_secret_bearing_api_config(parser_config: dict | None) -> None:
         )
 
 
+class SourcePathRead(BaseModel):
+    key: str
+    label: str
+    engine: str
+    status: str
+    url: str | None = None
+
+
+class SourceProbeRequest(BaseModel):
+    start_url: HttpUrl
+
+
+class SourceProbePreview(BaseModel):
+    outcome: str
+    final_url: str
+    recommended: SourcePathRead | None = None
+    paths: list[SourcePathRead] = Field(default_factory=list)
+
+
+class CrawlSelectedRequest(BaseModel):
+    source_ids: list[int] = Field(min_length=1, max_length=100)
+
+
+class SourceRetireResult(BaseModel):
+    deleted: int = 0
+    hidden: int = 0
+
+
 class SourceCreate(BaseModel):
     catalog_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9_-]+$")
-    name: str = Field(min_length=1, max_length=200)
+    name: str | None = Field(default=None, min_length=1, max_length=200)
     channel_type: ChannelType = "web"
     start_url: HttpUrl
+    probe: bool = False
     fetch_interval_seconds: int = Field(default=3600, gt=0, le=604800)
     parser_config: dict = Field(default_factory=dict)
     processing_config: dict = Field(default_factory=dict)
@@ -95,6 +124,13 @@ class SourceRead(BaseModel):
     consecutive_failures: int = 0
     circuit_open: bool = False
     last_finished_at: datetime | None = None
+    last_fetched_count: int = 0
+    last_new_count: int = 0
+    last_skipped_count: int = 0
+    last_rejected_count: int = 0
+    last_error_summary: str | None = None
+    execution_engine: str | None = None
+    viable_paths: list[SourcePathRead] = Field(default_factory=list)
 
 
 class CrawlRunRead(BaseModel):
@@ -315,6 +351,34 @@ class EventDetailRead(EventRead):
     members: list[EventMemberRead]
 
 
+class ReaderEventSource(BaseModel):
+    source_name: str
+    url: str | None
+
+
+class ReaderEventMember(BaseModel):
+    content_id: int
+    title: str
+    excerpt: str | None
+    paragraphs: list[str] = Field(default_factory=list)
+    source_name: str
+    url: str | None
+    published_at: datetime | None
+
+
+class ReaderEventRead(BaseModel):
+    id: int
+    title: str
+    summary: str | None
+    paragraphs: list[str] = Field(default_factory=list)
+    first_published_at: datetime
+    last_published_at: datetime
+    source_count: int
+    member_count: int
+    sources: list[ReaderEventSource]
+    members: list[ReaderEventMember] = Field(default_factory=list)
+
+
 class ContentValueScoreRead(BaseModel):
     id: int
     run_id: int
@@ -443,6 +507,7 @@ class TopicFeedItem(BaseModel):
     content_id: int
     title: str
     excerpt: str | None
+    paragraphs: list[str] = Field(default_factory=list)
     source_name: str
     url: str | None
     published_at: datetime | None

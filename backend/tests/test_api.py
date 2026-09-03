@@ -1,13 +1,34 @@
 from datetime import UTC, date, datetime, timedelta
 from unittest.mock import patch
 
+import pytest
 from sqlalchemy import select
 
+from app.auth import create_user
 from app.content_processing import PROCESSOR_NAME, PROCESSOR_VERSION
 from app.models import ContentItem, ContentProcessingResult, CrawlRun, RawItem, Source
 
+PASSWORD = "Admin-password-2026"
 
-def test_health_and_source_lifecycle(client):
+
+@pytest.fixture
+def operator(client, session_factory):
+    with session_factory() as db:
+        create_user(
+            db,
+            email="operator@example.com",
+            display_name="管理员",
+            password=PASSWORD,
+            role="admin",
+        )
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "operator@example.com", "password": PASSWORD},
+    )
+    assert response.status_code == 200
+
+
+def test_health_and_source_lifecycle(client, operator):
     assert client.get("/health/live").json() == {"status": "ok"}
     created = client.post(
         "/api/v1/sources",
@@ -29,12 +50,12 @@ def test_health_and_source_lifecycle(client):
     assert client.post(f"/api/v1/sources/{source_id}/crawl").status_code == 409
 
 
-def test_source_validation_and_not_found(client):
+def test_source_validation_and_not_found(client, operator):
     assert client.post("/api/v1/sources", json={"name": "", "start_url": "bad"}).status_code == 422
     assert client.patch("/api/v1/sources/999", json={"is_enabled": False}).status_code == 404
 
 
-def test_source_registration_validates_channel_rules(client):
+def test_source_registration_validates_channel_rules(client, operator):
     created = client.post(
         "/api/v1/sources",
         json={
@@ -90,7 +111,7 @@ def test_source_registration_validates_channel_rules(client):
     assert "conflicts" in conflicting_engine.text
 
 
-def test_scheduler_lists_due_sources_and_manual_trigger_respects_stop_rules(client):
+def test_scheduler_lists_due_sources_and_manual_trigger_respects_stop_rules(client, operator):
     due = client.post(
         "/api/v1/sources",
         json={"name": "Due Source", "start_url": "https://example.com/due"},
@@ -182,7 +203,7 @@ def test_content_api_filters_midstream_relevance(client, session_factory):
     assert unfiltered[0]["relevance_reason"] is None
 
 
-def test_source_health_and_failed_run_retry(client, session_factory):
+def test_source_health_and_failed_run_retry(client, session_factory, operator):
     created = client.post(
         "/api/v1/sources",
         json={"name": "Unstable Source", "start_url": "https://example.com/unstable"},
@@ -219,7 +240,7 @@ def test_source_health_and_failed_run_retry(client, session_factory):
         assert client.post(f"/api/v1/crawl-runs/{run_id}/retry").status_code == 202
 
 
-def test_date_backfill_and_retry_keep_frozen_coverage(client, session_factory):
+def test_date_backfill_and_retry_keep_frozen_coverage(client, session_factory, operator):
     created = client.post(
         "/api/v1/sources",
         json={
@@ -260,7 +281,7 @@ def test_date_backfill_and_retry_keep_frozen_coverage(client, session_factory):
         assert retried.retry_of_run_id == backfill.json()["run_id"]
 
 
-def test_non_date_source_rejects_explicit_coverage_date(client):
+def test_non_date_source_rejects_explicit_coverage_date(client, operator):
     created = client.post(
         "/api/v1/sources",
         json={"name": "Ordinary web", "start_url": "https://example.com/ordinary"},
@@ -274,7 +295,7 @@ def test_non_date_source_rejects_explicit_coverage_date(client):
     assert "coverage_date_requires_previous_day_source" in response.text
 
 
-def test_active_run_with_different_coverage_date_returns_conflict(client):
+def test_active_run_with_different_coverage_date_returns_conflict(client, operator):
     created = client.post(
         "/api/v1/sources",
         json={

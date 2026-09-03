@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Protocol
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -12,6 +13,7 @@ from .execution_engines import (
 from .models import CrawlRun, Source, utcnow
 
 CHANNEL_TYPES = ("web", "rss", "api", "third_party_feed")
+logger = logging.getLogger("navigate.crawl")
 
 
 class ChannelConfigurationError(ValueError):
@@ -137,3 +139,11 @@ async def crawl_source(factory: sessionmaker, source_id: int, run_id: int) -> No
             session.commit()
             return
     await adapter.crawl(factory, source_id, run_id)
+    from .topic_distribution import distribute_crawl_run
+
+    with factory() as session:
+        try:
+            distribute_crawl_run(session, run_id)
+        except Exception:
+            logger.exception("topic distribution failed run_id=%s", run_id)
+            session.rollback()

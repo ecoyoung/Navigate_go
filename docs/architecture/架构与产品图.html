@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navigate · 架构与产品图</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #e6dfd4;
+      --paper: #f7f2e8;
+      --paper-deep: #eee6d8;
+      --surface: #fbf7ef;
+      --ink: #24201d;
+      --muted: #817972;
+      --wine: #722f37;
+      --wine-deep: #5a252c;
+      --rule: #d8cdbb;
+      --live: #722f37;
+      --fallback: #8a6a4b;
+      --serif: "Songti SC", "STSong", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", Georgia, serif;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow: 0 24px 70px rgba(69, 52, 42, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    html { background: var(--canvas); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(69, 52, 42, 0.055) 0.7px, transparent 0.8px) 0 0 / 7px 7px,
+        var(--canvas);
+      text-wrap: pretty;
+    }
+    button, a { font: inherit; color: inherit; }
+    button { cursor: pointer; background: none; border: 0; padding: 0; }
+    button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+      outline: 2px solid var(--wine);
+      outline-offset: 3px;
+    }
+
+    .sheet {
+      width: min(1240px, calc(100% - 32px));
+      margin: 24px auto 80px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--rule);
+    }
+
+    .masthead {
+      padding: 28px 36px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--serif);
+      font-size: 20px;
+      letter-spacing: 0.04em;
+    }
+    .brand svg { display: block; }
+    .meta {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    .rules {
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 14px 0 12px;
+    }
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      line-height: 1.15;
+    }
+    .deck {
+      margin: 8px 0 0;
+      max-width: 46em;
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-top: 22px;
+    }
+    .tabs [role="tab"] {
+      position: relative;
+      padding: 12px 22px 14px;
+      color: var(--muted);
+      font-family: var(--serif);
+      font-size: 18px;
+      letter-spacing: 0.08em;
+    }
+    .tabs [role="tab"][aria-selected="true"] {
+      color: var(--ink);
+    }
+    .tabs [role="tab"][aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: -1px;
+      height: 2px;
+      background: var(--wine);
+    }
+
+    .panel { padding: 28px 36px 40px; }
+    .panel[hidden] { display: none; }
+
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 0 0 16px;
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+    .section-title b {
+      color: var(--wine);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+    }
+
+    .note, .why { color: var(--muted); font-size: 14px; }
+    body[data-notes="brief"] .note { display: none; }
+
+    .block { margin-bottom: 36px; }
+    .block:last-child { margin-bottom: 0; }
+
+    .runtime {
+      display: grid;
+      grid-template-columns: 1.1fr auto 1.4fr auto 1.3fr auto 1fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .runtime-sub {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--rule);
+    }
+    .runtime-sub .join { flex: 1.3; }
+    .runtime-sub .ghost { flex: 1; }
+    .runtime-sub .hint {
+      flex: 2.5;
+      display: flex;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .node, .job, .surface, .card-unit, .loop-step {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 14px 16px;
+    }
+    .node:hover, .job:hover, .surface:hover, .loop-step:hover {
+      border-color: color-mix(in srgb, var(--wine) 45%, var(--rule));
+      background: color-mix(in srgb, var(--paper) 70%, white);
+    }
+    .node h3, .job h3, .surface h3, .card-unit h3, .loop-step h3 {
+      margin: 0 0 4px;
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--wine);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wine);
+      font-family: var(--serif);
+      font-size: 22px;
+      min-width: 18px;
+    }
+    .join {
+      border: 1px dashed var(--wine);
+      background: color-mix(in srgb, var(--wine) 6%, var(--paper));
+      text-align: center;
+      font-family: var(--serif);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .lane {
+      padding: 18px;
+      background: var(--paper-deep);
+      border: 1px solid var(--rule);
+    }
+    .lane.live { box-shadow: inset 3px 0 0 var(--wine); }
+    .lane.pay { box-shadow: inset 3px 0 0 var(--fallback); }
+    .lane h3 {
+      margin: 0 0 6px;
+      font-family: var(--serif);
+      font-size: 20px;
+    }
+    .lane ol, .lane ul { margin: 10px 0 0; padding-left: 1.1em; }
+    .lane li { margin: 4px 0; }
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 0 6px;
+      border: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      vertical-align: middle;
+    }
+    .badge.wine { color: var(--wine); border-color: color-mix(in srgb, var(--wine) 40%, var(--rule)); }
+
+    .rail {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+    .station {
+      position: relative;
+      min-height: 132px;
+      padding: 14px 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+    }
+    .station::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--wine);
+      font-family: var(--serif);
+      z-index: 1;
+    }
+    .station:last-child::after { content: none; }
+    .idx {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--wine);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+    }
+    .station strong, .engine strong {
+      display: block;
+      font-family: var(--serif);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .engines {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .lane-engines { grid-template-columns: repeat(2, 1fr); }
+    .lane-engines .engine:last-child { grid-column: 1 / -1; }
+    .engine {
+      padding: 12px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .engine.idle { opacity: 0.55; }
+    body[data-path="live"] [data-layer="legacy"] { display: none; }
+
+    .out {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+    }
+    .ghost {
+      color: var(--muted);
+      border-style: dashed;
+      background: transparent;
+    }
+
+    .who, .surfaces, .loop {
+      display: grid;
+      gap: 12px;
+    }
+    .who { grid-template-columns: 1.2fr 1fr; }
+    .surfaces { grid-template-columns: repeat(3, 1fr); }
+    .loop { grid-template-columns: repeat(4, 1fr); }
+    .loop-step { position: relative; }
+    .loop-step .n {
+      font-family: var(--serif);
+      color: var(--wine);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .card-unit {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      padding: 22px;
+    }
+    .sample {
+      border-left: 1px solid var(--ink);
+      padding-left: 18px;
+    }
+    .sample small { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+    .sample h4 {
+      margin: 6px 0 8px;
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .sample p { margin: 0; }
+
+    .dont {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .dont div {
+      padding: 14px;
+      border: 1px dashed var(--rule);
+      color: var(--muted);
+    }
+    .dont strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+      font-family: var(--serif);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .swatch {
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      margin-right: 8px;
+      vertical-align: middle;
+      background: var(--wine);
+    }
+    .swatch.dash {
+      background: repeating-linear-gradient(90deg, var(--fallback) 0 6px, transparent 6px 10px);
+    }
+
+    .tweaks-toggle {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      padding: 8px 12px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      box-shadow: var(--shadow);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .tweaks {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      width: 260px;
+      padding: 16px;
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      box-shadow: var(--shadow);
+    }
+    .tweaks[hidden] { display: none; }
+    .tweaks h2 {
+      margin: 0 0 12px;
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .tweaks label {
+      display: block;
+      margin: 10px 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+    .tweaks select, .tweaks button.close {
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .tweaks button.close { margin-top: 14px; font-family: var(--mono); letter-spacing: 0.08em; }
+
+    @media (max-width: 980px) {
+      .sheet { width: calc(100% - 16px); margin: 12px auto 72px; }
+      .masthead, .panel { padding-left: 18px; padding-right: 18px; }
+      .runtime, .rail, .engines, .split, .out, .who, .surfaces, .loop, .dont, .card-unit, .runtime-sub {
+        grid-template-columns: 1fr;
+      }
+      .runtime-sub { display: grid; }
+      .arrow { display: none; }
+      .station::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -14px; transform: translateX(-50%); }
+      .station { min-height: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+    body[data-motion="off"] .live-pulse { animation: none; }
+    .live-pulse {
+      animation: pulse 2.4s var(--ease) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: inset 3px 0 0 var(--wine); }
+      50% { box-shadow: inset 6px 0 0 var(--wine); }
+    }
+  </style>
+</head>
+<body data-notes="full" data-path="all" data-motion="on">
+  <article class="sheet">
+    <header class="masthead">
+      <div class="kicker">
+        <div class="brand">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+            <path fill="#722F37" d="M4.8 2.2h4.2v10.4L15.8 2.2H20.2v19.6h-4.2V11.4L9 21.8H4.8V2.2z"/>
+          </svg>
+          Navigate
+        </div>
+        <div class="meta">纸面编辑室 · 现行路径 2026-09-03</div>
+      </div>
+      <div class="rules">
+        <h1>架构与产品图</h1>
+        <p class="deck">同一份纸面的两面：左边看系统怎么把网页收成中文卡片，右边看读者和管理员各自完成什么。切换标签即可，不混在一张流程图里。</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="视角">
+        <button role="tab" id="tab-arch" aria-controls="panel-arch" aria-selected="true">壹 · 架构思路</button>
+        <button role="tab" id="tab-pm" aria-controls="panel-pm" aria-selected="false">贰 · 产品视角</button>
+      </div>
+    </header>
+
+    <section class="panel" id="panel-arch" role="tabpanel" aria-labelledby="tab-arch">
+      <div class="block">
+        <h2 class="section-title"><b>01</b> 运行时只保留四件事</h2>
+        <div class="runtime">
+          <div class="node"><span class="tag">入口</span><h3>浏览器 / 域名</h3><p class="note">Cloudflare Tunnel 打到同一 nginx。</p></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><span class="tag">web</span><h3>nginx + Vue</h3><p class="note">静态工作台。/api、/health、/docs 反代到 backend。</p></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><span class="tag">backend</span><h3>FastAPI</h3><p class="note">账号、主题、探索、简报、采集管理。</p></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><span class="tag">data</span><h3>SQLite</h3><p class="note">只挂 backend/data。改库不用重建镜像。</p></div>
+        </div>
+        <div class="runtime-sub">
+          <div class="node join"><span class="tag">crawler</span><h3>同一镜像，每分钟看槽位</h3><p class="note">北京时间 09:30 / 18:00 采目录源，并回填中文卡片。</p></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node ghost"><span class="tag">共享</span><h3>同一份库</h3><p class="note">采集与读写不各建一套内容。</p></div>
+          <p class="hint">crawler 不另起内容池，写回 backend 正在读的 SQLite。</p>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>02</b> 采集必须分成两条路</h2>
+        <p class="why">目录引擎稳、便宜、每天都要跑。Firecrawl 快，但按页计费，只能补缺口。不要把它们画成同一个爬虫。</p>
+        <div class="split">
+          <article class="lane live live-pulse">
+            <h3>目录定时 <span class="badge wine">主路径</span></h3>
+            <p>启用中的网站源，每天两次，走自己的引擎。管理员手动抓取也走这条，不走 Firecrawl。</p>
+            <div class="engines lane-engines" style="margin-top:14px">
+              <div class="engine"><strong>HTML</strong><span class="note">列表 + 详情</span></div>
+              <div class="engine"><strong>RSS / Atom</strong><span class="note">条件请求</span></div>
+              <div class="engine"><strong>Sitemap</strong><span class="note">地图 + 详情</span></div>
+              <div class="engine"><strong>JSON API</strong><span class="note">公开接口</span></div>
+              <div class="engine idle" data-layer="legacy"><strong>Provider</strong><span class="note">RedFox，默认停用</span></div>
+            </div>
+          </article>
+          <article class="lane pay">
+            <h3>主题发现 <span class="badge">主动才联网</span></h3>
+            <p>创建主题只编译意图。只有用户点「发现来源」才消耗额度。</p>
+            <ol>
+              <li>先匹配本地内容池</li>
+              <li>DeepSeek 编成可审计的搜索计划</li>
+              <li>Firecrawl Search 补 URL</li>
+              <li>五种引擎先抽正文</li>
+              <li>抽不出，再 Scrape</li>
+            </ol>
+            <p class="note">发现源默认停用，不自动加入每天两次的目录调度。</p>
+          </article>
+        </div>
+        <p class="legend"><span><i class="swatch"></i>现行、计次免费的目录路径</span><span><i class="swatch dash"></i>按次计费的发现路径</span></p>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>03</b> 入库之后只加工一次</h2>
+        <p class="why">卡片是共享工件。探索、主题流、简报都读它，不要每个主题再写一遍。</p>
+        <div class="rail">
+          <div class="station"><span class="idx">01</span><strong>快照</strong><p class="note">外部响应进 PageSnapshot，可审计、可重放。</p></div>
+          <div class="station"><span class="idx">02</span><strong>原文版本</strong><p class="note">语义变了才追加 RawItem，旧版不改写。</p></div>
+          <div class="station"><span class="idx">03</span><strong>内容条目</strong><p class="note">投影为 article.v1.1，去重后进共享池。</p></div>
+          <div class="station"><span class="idx">04</span><strong>主题匹配</strong><p class="note">中英关键词先判；跨语种未命中再 LLM review。</p></div>
+          <div class="station"><span class="idx">05</span><strong>中文卡片</strong><p class="note">洗净后再送 DeepSeek。日限 100，不设 max_tokens。</p></div>
+          <div class="station"><span class="idx">06</span><strong>产品面</strong><p class="note">探索 / 为你 / 主题流 / 主题简报。GET 简报不再打模型。</p></div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>04</b> 什么不算读者主路径</h2>
+        <div class="out">
+          <div class="node">
+            <span class="tag">仍保留</span>
+            <h3>治理层</h3>
+            <p>领域归属、实体主库、价值评分、领域 HTML 日报 CLI。给内部治理用，工作台不展示分数和算法说明。</p>
+          </div>
+          <div class="node ghost" data-layer="legacy">
+            <span class="tag">已退出</span>
+            <h3>不要再画进来</h3>
+            <p>home.json 快照、Cloudflare Sites 前端、公众号浏览器采集、打开简报时再写一篇 topic_content_editorial。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-pm" role="tabpanel" aria-labelledby="tab-pm" hidden>
+      <div class="block">
+        <h2 class="section-title"><b>01</b> 谁在用，各自完成什么</h2>
+        <div class="who">
+          <article class="job">
+            <span class="tag">订阅读者</span>
+            <h3>持续盯一个行业问题</h3>
+            <p>对象是意图，不是某个网站。例如「具身智能创业融资」，而不是「订阅 36氪」。</p>
+            <ul class="note">
+              <li>创建主题立刻看到池内匹配，不联网</li>
+              <li>在站内读完凝练卡片，原文只是次入口</li>
+              <li>每天看一份按事件栏目排好的简报</li>
+            </ul>
+          </article>
+          <article class="job">
+            <span class="tag">管理员</span>
+            <h3>把来源养在目录里</h3>
+            <p>补充网站、看通路能否打通、手动抓一轮、把爬不了的源移出列表。</p>
+            <ul class="note">
+              <li>失败源仍可选中并移除</li>
+              <li>有内容外键的源只能停用，稿件保留</li>
+              <li>发现来源不会自动变成每日两次的目录站</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>02</b> 五个界面怎么分工</h2>
+        <div class="surfaces">
+          <article class="surface"><span class="tag">为你</span><h3>合并已订阅主题</h3><p>只放 TopicMatch.include 的可读稿。这是默认工作台，不是门户首页。</p></article>
+          <article class="surface"><span class="tag">我的主题</span><h3>管理意图</h3><p>创建、暂停、删除、预览。发现来源是显式动作，创建主题不是。</p></article>
+          <article class="surface"><span class="tag">探索</span><h3>看目录刚取回的稿</h3><p>网站源里有日期、正文可读的最新内容。手动抓完应出现在这里。</p></article>
+          <article class="surface"><span class="tag">每日简报</span><h3>成品报纸</h3><p>按主题和覆盖日排版。导语最多三条头条第一句。栏目是人事 / 融资 / 监管 / 产品 / 要闻。</p></article>
+          <article class="surface"><span class="tag">今日事件</span><h3>只放多源聚类</h3><p>至少两篇可读成员才进事件栏。单篇留在资讯流，避免把每篇稿再列一遍。</p></article>
+          <article class="surface"><span class="tag">管理</span><h3>网站与账号</h3><p>通路标签、临时抓取、删除失败源。前台不写额度或爬虫过程。</p></article>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>03</b> 价值单元是卡片，不是标题列表</h2>
+        <div class="card-unit">
+          <div>
+            <span class="tag">content_editorial_zh</span>
+            <h3>站内读完的最小成品</h3>
+            <p>中文标题、一到三句事实摘要、可选标签。英文稿要先译成中文卡片。清洗网页壳是规则，写卡片是模型；两者不能互相替代。</p>
+            <p class="note">没有合格编辑件时才回退抽取式，不能把导航、广告、署名送进读者视野。</p>
+          </div>
+          <div class="sample">
+            <small>来源名 · 发布日期</small>
+            <h4>中文标题</h4>
+            <p>一到三句已洗净的事实摘要。点击留在本页。原文是次入口。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>04</b> 读者的一天</h2>
+        <div class="loop">
+          <article class="loop-step"><div class="n">1</div><h3>写下意图</h3><p>编译主题。此时只查共享池，不花 Firecrawl。</p></article>
+          <article class="loop-step"><div class="n">2</div><h3>读卡片</h3><p>为你精选和探索都是同一类卡片。目录每天两次在背后更新。</p></article>
+          <article class="loop-step"><div class="n">3</div><h3>不够再发现</h3><p>主动点发现，Search 补 URL，引擎优先，Scrape 兜底。</p></article>
+          <article class="loop-step"><div class="n">4</div><h3>收口成简报</h3><p>用已有卡片排版，不再摘要一次。栏目按事件，不按公司名。</p></article>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="section-title"><b>05</b> 产品明确不做</h2>
+        <div class="dont">
+          <div><strong>不展示过程</strong>额度、算法、评分、抓取日志不进读者文案。</div>
+          <div><strong>不自动全网爬</strong>Firecrawl 不是目录站的每日爬虫，也不对普通用户开放 Crawl。</div>
+          <div><strong>不把标题当外链</strong>列表主点击留在站内卡片，而不是跳原文。</div>
+          <div><strong>不为每个主题重写</strong>简报复用通用卡片。打开简报是读，不是生成。</div>
+        </div>
+      </div>
+    </section>
+  </article>
+
+  <button class="tweaks-toggle" id="tweaks-open" type="button">Tweaks</button>
+  <aside class="tweaks" id="tweaks" hidden>
+    <h2>Tweaks</h2>
+    <label for="notes">注释密度</label>
+    <select id="notes">
+      <option value="full">全注</option>
+      <option value="brief">只留判断</option>
+    </select>
+    <label for="path">路径</label>
+    <select id="path">
+      <option value="all">全部层</option>
+      <option value="live">只看现行</option>
+    </select>
+    <label for="motion">动效</label>
+    <select id="motion">
+      <option value="on">开</option>
+      <option value="off">关</option>
+    </select>
+    <button class="close" id="tweaks-close" type="button">关闭</button>
+  </aside>
+
+  <script>
+    const TAB_KEY = "navigate-arch-tab";
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const panels = {
+      "tab-arch": document.getElementById("panel-arch"),
+      "tab-pm": document.getElementById("panel-pm"),
+    };
+
+    function selectTab(id, persist) {
+      tabs.forEach((tab) => {
+        const on = tab.id === id;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        panels[tab.id].hidden = !on;
+      });
+      if (persist !== false) localStorage.setItem(TAB_KEY, id);
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => selectTab(tab.id));
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        event.preventDefault();
+        const next = event.key === "ArrowRight" ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+        tabs[next].focus();
+        selectTab(tabs[next].id);
+      });
+    });
+
+    const saved = localStorage.getItem(TAB_KEY);
+    if (saved && panels[saved]) selectTab(saved, false);
+
+    const tweaks = document.getElementById("tweaks");
+    const openBtn = document.getElementById("tweaks-open");
+    document.getElementById("tweaks-close").addEventListener("click", () => {
+      tweaks.hidden = true;
+      openBtn.hidden = false;
+    });
+    openBtn.addEventListener("click", () => {
+      tweaks.hidden = false;
+      openBtn.hidden = true;
+    });
+
+    const apply = () => {
+      document.body.dataset.notes = document.getElementById("notes").value;
+      document.body.dataset.path = document.getElementById("path").value;
+      document.body.dataset.motion = document.getElementById("motion").value;
+    };
+    ["notes", "path", "motion"].forEach((id) => {
+      document.getElementById(id).addEventListener("change", apply);
+    });
+  </script>
+</body>
+</html>

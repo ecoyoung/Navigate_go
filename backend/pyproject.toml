@@ -13,7 +13,9 @@ dependencies = [
   "python-dateutil>=2.9,<3",
   "python-dotenv>=1.1,<2",
   "sqlalchemy>=2.0.40,<3",
+  "tzdata>=2025.1",
   "uvicorn[standard]>=0.35,<1",
+  "zhconv>=1.4.3",
 ]
 
 [dependency-groups]

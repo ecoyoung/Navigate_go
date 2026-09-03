@@ -95,6 +95,68 @@ def fake_search_plan(_db, topic, _client):
     )
 
 
+def fail_direct_fetch(_db, *, source, run, url, article):
+    return {
+        **article,
+        "validation_warnings": [
+            *(article.get("validation_warnings") or []),
+            "content_enrichment_failed:HTTPError",
+        ],
+    }
+
+
+def article_html(*, title: str, published_at: str, body: str) -> str:
+    return f"""
+    <html><head>
+      <title>{title}</title>
+      <script type="application/ld+json">{{
+        "@context":"https://schema.org",
+        "@type":"NewsArticle",
+        "headline":"{title}",
+        "datePublished":"{published_at}"
+      }}</script>
+    </head><body>
+      <h1>{title}</h1>
+      <article>{body}</article>
+    </body></html>
+    """
+
+
+def patch_direct_http(monkeypatch, pages: dict[str, httpx.Response]):
+    class FakeHTTPClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def get(self, url):
+            target = str(url)
+            if target in pages:
+                return pages[target]
+            if target.endswith("/robots.txt"):
+                return httpx.Response(
+                    200,
+                    text="User-agent: *\nAllow: /\n",
+                    request=httpx.Request("GET", target),
+                )
+            return httpx.Response(404, text="missing", request=httpx.Request("GET", target))
+
+    monkeypatch.setattr("app.topic_discovery.httpx.Client", FakeHTTPClient)
+
+
+def html_response(url: str, text: str, status_code: int = 200) -> httpx.Response:
+    return httpx.Response(
+        status_code,
+        text=text,
+        headers={"content-type": "text/html"},
+        request=httpx.Request("GET", url),
+    )
+
+
 def test_create_topic_previews_existing_pool(client, session_factory):
     seed_user_and_content(session_factory)
     login(client)
@@ -151,6 +213,7 @@ def test_discover_uses_bounded_cached_firecrawl_search(client, session_factory, 
 
     monkeypatch.setattr("app.main.cached_search", fake_cached_search)
     monkeypatch.setattr("app.main.compile_topic_search_plan", fake_search_plan)
+    monkeypatch.setattr("app.topic_discovery._web_enrichment_detail", fail_direct_fetch)
     scrape_calls = []
 
     fresh_published_at = (datetime.now(UTC) - timedelta(hours=12)).isoformat()
@@ -221,6 +284,7 @@ def test_discover_rejects_content_outside_collection_window(
     ).json()["topic"]["id"]
 
     monkeypatch.setattr("app.main.compile_topic_search_plan", fake_search_plan)
+    monkeypatch.setattr("app.topic_discovery._web_enrichment_detail", fail_direct_fetch)
     monkeypatch.setattr(
         "app.main.cached_search",
         lambda *_args, **_kwargs: (
@@ -380,6 +444,7 @@ def test_discover_retries_incomplete_existing_content_with_web_pipeline(
 
     monkeypatch.setattr("app.main.cached_search", fake_cached_search)
     monkeypatch.setattr("app.main.compile_topic_search_plan", fake_search_plan)
+    monkeypatch.setattr("app.topic_discovery._web_enrichment_detail", fail_direct_fetch)
     monkeypatch.setattr("app.main.FirecrawlClient.from_environment", FakeClient)
 
     first = client.post(f"/api/v1/topics/{topic_id}/discover", json={"limit": 1})
@@ -400,8 +465,8 @@ def test_discover_retries_incomplete_existing_content_with_web_pipeline(
         db.commit()
     third = client.post(f"/api/v1/topics/{topic_id}/discover", json={"limit": 1})
     assert third.status_code == 200
-    assert third.json()["fetched_pages"] == 0
-    assert attempts == 1
+    assert third.json()["fetched_pages"] == 1
+    assert attempts == 2
     with session_factory() as db:
         content = db.scalar(
             select(ContentItem).where(ContentItem.canonical_url == "https://pet.example.com/export")
@@ -410,7 +475,22 @@ def test_discover_retries_incomplete_existing_content_with_web_pipeline(
         assert content.quality["last_enrichment_attempt_at"]
 
 
-def test_discover_automatically_parses_webpage_when_firecrawl_has_no_date(
+def _discover_search(monkeypatch, url: str, title: str = "防晒新品"):
+    def fake_cached_search(_db, _client, *, query, limit, search_options):
+        return (
+            {
+                "success": True,
+                "data": {"web": [{"url": url, "title": title, "description": "候选来源"}]},
+            },
+            False,
+            2,
+        )
+
+    monkeypatch.setattr("app.main.cached_search", fake_cached_search)
+    monkeypatch.setattr("app.main.compile_topic_search_plan", fake_search_plan)
+
+
+def test_discover_uses_direct_html_and_skips_firecrawl_scrape(
     client, session_factory, monkeypatch
 ):
     seed_user_and_content(session_factory)
@@ -419,47 +499,138 @@ def test_discover_automatically_parses_webpage_when_firecrawl_has_no_date(
         "/api/v1/topics",
         json={"intent_text": "关注防晒新品", "daily_credit_limit": 10},
     ).json()["topic"]["id"]
-
-    def fake_cached_search(_db, _client, *, query, limit, search_options):
-        return (
-            {
-                "success": True,
-                "data": {"web": [{"url": "https://news.example.com/a", "title": "防晒新品"}]},
-            },
-            False,
-            2,
-        )
+    url = "https://news.example.com/a"
+    published_at = (datetime.now(UTC) - timedelta(hours=12)).isoformat()
+    html = article_html(
+        title="防晒新品",
+        published_at=published_at,
+        body="网页解析后的完整正文" * 40,
+    )
+    scrape_calls = []
 
     class FakeClient:
-        def scrape(self, _url):
-            return {
-                "success": True,
-                "data": {"markdown": "正文" * 300, "metadata": {"title": "防晒新品"}},
-            }
+        def scrape(self, target):
+            scrape_calls.append(target)
+            raise AssertionError("direct html success should not scrape")
 
-    def parsed_webpage(_db, *, source, run, url, article):
-        return {
-            **article,
-            "published_at": datetime(2026, 9, 1, tzinfo=UTC),
-            "body": "网页解析后的完整正文" * 200,
-            "content_completeness": "full",
-            "validation_warnings": ["content_enrichment_web"],
-        }
-
-    monkeypatch.setattr("app.main.cached_search", fake_cached_search)
-    monkeypatch.setattr("app.main.compile_topic_search_plan", fake_search_plan)
+    _discover_search(monkeypatch, url)
     monkeypatch.setattr("app.main.FirecrawlClient.from_environment", FakeClient)
-    monkeypatch.setattr("app.topic_discovery._web_enrichment_detail", parsed_webpage)
+    patch_direct_http(monkeypatch, {url: html_response(url, html)})
 
     response = client.post(f"/api/v1/topics/{topic_id}/discover", json={"limit": 1})
     assert response.status_code == 200
+    assert response.json()["credits_used"] == 2
+    assert response.json()["fetched_pages"] == 0
+    assert response.json()["ingested_count"] == 1
+    assert scrape_calls == []
     with session_factory() as db:
-        content = db.scalar(
-            select(ContentItem).where(ContentItem.canonical_url == "https://news.example.com/a")
-        )
+        content = db.scalar(select(ContentItem).where(ContentItem.canonical_url == url))
         assert content is not None
-        assert content.published_at.replace(tzinfo=UTC) == datetime(2026, 9, 1, tzinfo=UTC)
-        assert "content_enrichment_web" in content.quality["validation_warnings"]
+        assert content.published_at is not None
+        assert "网页解析后的完整正文" in (content.body or "")
+
+
+@pytest.mark.parametrize(
+    ("status_code", "html"),
+    [
+        (200, "<html><body><div id='root'></div></body></html>"),
+        (403, "denied"),
+        (
+            200,
+            "<html><body><h1>防晒新品</h1><article>"
+            + "没有发布日期的正文。" * 40
+            + "</article></body></html>",
+        ),
+    ],
+)
+def test_discover_scrapes_when_direct_html_is_blocked_or_undated(
+    client, session_factory, monkeypatch, status_code, html
+):
+    seed_user_and_content(session_factory)
+    login(client)
+    topic_id = client.post(
+        "/api/v1/topics",
+        json={"intent_text": "关注防晒新品", "daily_credit_limit": 10},
+    ).json()["topic"]["id"]
+    url = "https://news.example.com/js-shell"
+    published_at = (datetime.now(UTC) - timedelta(hours=12)).isoformat()
+    scrape_calls = []
+
+    class FakeClient:
+        def scrape(self, target):
+            scrape_calls.append(target)
+            return {
+                "success": True,
+                "data": {
+                    "markdown": "补抓后的完整正文" * 40,
+                    "metadata": {
+                        "title": "防晒新品",
+                        "statusCode": 200,
+                        "publishedTime": published_at,
+                    },
+                },
+            }
+
+    _discover_search(monkeypatch, url)
+    monkeypatch.setattr("app.main.FirecrawlClient.from_environment", FakeClient)
+    patch_direct_http(monkeypatch, {url: html_response(url, html, status_code)})
+
+    response = client.post(f"/api/v1/topics/{topic_id}/discover", json={"limit": 1})
+    assert response.status_code == 200
+    assert scrape_calls == [url]
+    assert response.json()["fetched_pages"] == 1
+    assert response.json()["credits_used"] == 3
+    with session_factory() as db:
+        content = db.scalar(select(ContentItem).where(ContentItem.canonical_url == url))
+        assert content is not None
+        assert content.published_at is not None
+        assert len(content.body or "") >= 200
+
+
+def test_discover_prefers_enabled_host_source_for_direct_html(
+    client, session_factory, monkeypatch
+):
+    seed_user_and_content(session_factory)
+    with session_factory() as db:
+        db.add(
+            Source(
+                catalog_id="news_rss",
+                name="新闻RSS",
+                channel_type="rss",
+                start_url="https://news.example.com/feed.xml",
+                normalized_start_url="https://news.example.com/feed.xml",
+                parser_config={"discovery_method": "feed"},
+                is_enabled=True,
+            )
+        )
+        db.commit()
+    login(client)
+    topic_id = client.post(
+        "/api/v1/topics",
+        json={"intent_text": "关注防晒新品", "daily_credit_limit": 10},
+    ).json()["topic"]["id"]
+    url = "https://news.example.com/a"
+    published_at = (datetime.now(UTC) - timedelta(hours=12)).isoformat()
+    html = article_html(title="防晒新品", published_at=published_at, body="RSS同源正文补全。" * 40)
+    scrape_calls = []
+
+    class FakeClient:
+        def scrape(self, target):
+            scrape_calls.append(target)
+            raise AssertionError("enabled host source should not scrape")
+
+    _discover_search(monkeypatch, url)
+    monkeypatch.setattr("app.main.FirecrawlClient.from_environment", FakeClient)
+    patch_direct_http(monkeypatch, {url: html_response(url, html)})
+
+    response = client.post(f"/api/v1/topics/{topic_id}/discover", json={"limit": 1})
+    assert response.status_code == 200
+    assert scrape_calls == []
+    with session_factory() as db:
+        content = db.scalar(select(ContentItem).where(ContentItem.canonical_url == url))
+        source = db.get(Source, content.source_id)
+        assert source.channel_type == "rss"
+        assert source.catalog_id == "news_rss"
 
 
 def test_firecrawl_client_converts_network_failure_to_safe_error(monkeypatch):

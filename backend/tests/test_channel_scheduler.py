@@ -1,6 +1,7 @@
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import httpx
 from sqlalchemy import select
@@ -14,7 +15,9 @@ from app.channel_adapters import (
 )
 from app.crawl_scheduler import (
     create_due_runs,
+    current_schedule_slot_start,
     due_sources,
+    next_schedule_slot_start,
     recover_stale_runs,
     summarize_source_health,
 )
@@ -197,49 +200,83 @@ def test_channel_adapter_dispatches_through_resolved_engine(session_factory, mon
     assert dispatched == ["feed_direct"]
 
 
-def test_due_scheduler_honors_interval_state_and_access_rules(session_factory):
-    now = datetime(2026, 8, 27, 8, tzinfo=UTC)
+def _shanghai(year: int, month: int, day: int, hour: int, minute: int = 0) -> datetime:
+    return datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Asia/Shanghai"))
+
+
+def test_schedule_slots_are_beijing_morning_and_evening():
+    before_morning = _shanghai(2026, 8, 27, 9, 29)
+    at_morning = _shanghai(2026, 8, 27, 9, 30)
+    before_evening = _shanghai(2026, 8, 27, 17, 59)
+    at_evening = _shanghai(2026, 8, 27, 18, 0)
+
+    assert current_schedule_slot_start(before_morning) == _shanghai(
+        2026, 8, 26, 18
+    ).astimezone(UTC)
+    assert current_schedule_slot_start(at_morning) == at_morning.astimezone(UTC)
+    assert current_schedule_slot_start(before_evening) == _shanghai(
+        2026, 8, 27, 9, 30
+    ).astimezone(UTC)
+    assert current_schedule_slot_start(at_evening) == at_evening.astimezone(UTC)
+    assert next_schedule_slot_start(at_morning) == _shanghai(2026, 8, 27, 18).astimezone(UTC)
+
+
+def test_due_scheduler_honors_shanghai_slots_and_access_rules(session_factory):
+    morning = _shanghai(2026, 8, 27, 9, 30)
+    evening = _shanghai(2026, 8, 27, 18, 0)
     with session_factory() as session:
         never_run = make_source(session, name="never")
-        recent = make_source(session, name="recent")
-        old = make_source(session, name="old")
+        morning_done = make_source(session, name="morning-done")
+        yesterday_evening = make_source(session, name="yesterday-evening")
         make_source(session, name="disabled", enabled=False)
         make_source(
             session,
             name="blocked",
             parser_config={"crawl_strategy": "blocked"},
         )
+        make_source(
+            session,
+            name="discovered",
+            parser_config={"discovery_method": "user_topic"},
+        )
         active = make_source(session, name="active")
         session.add_all(
             [
                 CrawlRun(
-                    source_id=recent.id,
+                    source_id=morning_done.id,
                     trigger="schedule",
                     status="succeeded",
-                    started_at=now - timedelta(minutes=30),
+                    started_at=morning + timedelta(minutes=1),
                 ),
                 CrawlRun(
-                    source_id=old.id,
+                    source_id=yesterday_evening.id,
                     trigger="schedule",
                     status="succeeded",
-                    started_at=now - timedelta(hours=2),
+                    started_at=_shanghai(2026, 8, 26, 18, 5),
                 ),
                 CrawlRun(
                     source_id=active.id,
                     trigger="schedule",
                     status="running",
-                    started_at=now - timedelta(minutes=5),
+                    started_at=morning + timedelta(minutes=2),
                 ),
             ]
         )
         session.commit()
 
-        assert [source.name for source in due_sources(session, now=now)] == [
+        assert [source.name for source in due_sources(session, now=morning)] == [
             never_run.name,
-            old.name,
+            yesterday_evening.name,
         ]
-        scheduled = create_due_runs(session, now=now)
-        assert {item.source_id for item in scheduled} == {never_run.id, old.id}
+        scheduled = create_due_runs(session, now=morning)
+        assert {item.source_id for item in scheduled} == {
+            never_run.id,
+            yesterday_evening.id,
+        }
+        assert due_sources(session, now=morning + timedelta(minutes=10)) == []
+        assert [source.name for source in due_sources(session, now=evening)] == [
+            morning_done.name,
+        ]
         assert all(
             trigger == "schedule"
             for trigger in session.scalars(
@@ -272,7 +309,7 @@ def test_scheduled_date_source_freezes_previous_shanghai_day(session_factory):
 
 
 def test_scheduler_opens_circuit_after_consecutive_failures(session_factory):
-    now = datetime(2026, 8, 27, 8, tzinfo=UTC)
+    now = _shanghai(2026, 8, 27, 18, 5).astimezone(UTC)
     with session_factory() as session:
         healthy = make_source(session, name="healthy", interval=60)
         broken = make_source(session, name="broken", interval=60)

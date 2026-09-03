@@ -3,28 +3,39 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import time
 from dataclasses import dataclass, replace
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .daily_report import DailyReportData, ReportStory
 from .editorial_policy import EditorialPolicy, load_editorial_policy
 from .models import ContentItem, EventMember, LLMProcessingResult, Source
 
+logger = logging.getLogger("navigate.editorial")
 PROVIDER, DEFAULT_BASE_URL, DEFAULT_MODEL = "deepseek", "https://api.deepseek.com", "deepseek-v4-flash"
 CONTENT_TASK_NAME, CONTENT_SCHEMA_VERSION = "content_editorial_zh", "content_editorial.zh.v2"
-CONTENT_VALIDATOR_VERSION = "content-editorial-validator.v5"
+CONTENT_VALIDATOR_VERSION = "content-editorial-validator.v6"
 EDITION_TASK_NAME, EDITION_SCHEMA_VERSION = "daily_edition_zh", "daily_edition.zh.v1"
 EDITION_VALIDATOR_VERSION = "daily-edition-validator.v2"
-EVIDENCE_VERSION, DEFAULT_CONTENT_BATCH_SIZE = "content-evidence.v1", 4
+EVIDENCE_VERSION, DEFAULT_CONTENT_BATCH_SIZE = "content-evidence.v3", 4
+READER_EVIDENCE_EXCERPT_CHARS = 1200
+READER_EVIDENCE_BODY_CHARS = 2500
+READER_CONTENT_BATCH_SIZE = 2
+READER_BACKFILL_LIMIT = 4
+READER_EDITORIAL_DAILY_LIMIT = 100
+READER_CRAWL_LIMIT = READER_EDITORIAL_DAILY_LIMIT
 TASK_NAME, TASK_VERSION = EDITION_TASK_NAME, EDITION_SCHEMA_VERSION
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 
 
 class StrictModel(BaseModel):
@@ -45,7 +56,7 @@ class ContentEditorialInput(StrictModel):
     source_name: str
     language: str | None
     published_at: str | None
-    evidence_version: Literal["content-evidence.v1"]
+    evidence_version: Literal["content-evidence.v3"]
     evidence: list[EvidenceSpan] = Field(min_length=1)
 
 
@@ -178,7 +189,18 @@ class DeepSeekClient:
     def generate_json(self, *, system_prompt: str, user_prompt: str) -> LLMResponse:
         if not self.api_key:
             raise RuntimeError("No valid cached editorial result and no DeepSeek API key")
-        payload = {"model": self.model, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], "thinking": {"type": "disabled"}, "response_format": {"type": "json_object"}, "temperature": 0, "stream": False}
+        # Do not set max_tokens/max_completion_tokens; JSON cards must not be cut off.
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "thinking": {"type": "disabled"},
+            "response_format": {"type": "json_object"},
+            "temperature": 0,
+            "stream": False,
+        }
         last_error: Exception | None = None
         for attempt in range(2):
             try:
@@ -204,6 +226,15 @@ class DeepSeekClient:
 
 
 CONTENT_SYSTEM_PROMPT = """你是中文资讯编辑。仅依据 evidence 和本次 domain_policy 输出 JSON。schema_version 固定为 content_editorial.zh.v2，每个 content_ref 按原顺序输出一次。生成中文标题及 title_evidence_refs；标题必须包含自然中文表达，品牌和产品专名可以保留原文，但不能让整条标题只有外文、数字或符号。生成1—3 个 summary_units，每句 claim_ref 格式为 content:id#summary:序号；0—8 个 tags。tags 的 tag_key 和 label_zh 必须逐字取自 domain_policy.tag_catalog，不得创造近义标签；kind 只能为 entity/topic/event/product/geography/other。所有标题、摘要句和标签必须绑定该篇 evidence_refs。不得补充背景、常识、因果、影响、预测或评价。数字不是核心事实时应省略；确需使用时必须在 evidence 中存在，保留原数字形式、单位和百分号，不得换算或改写。JSON 形状：{"schema_version":"content_editorial.zh.v2","items":[{"content_ref":"content:id","input_content_hash":"sha256","chinese_title":"string","title_evidence_refs":["ref"],"summary_units":[{"claim_ref":"content:id#summary:1","text_zh":"string","evidence_refs":["ref"]}],"tags":[{"tag_key":"policy_key","label_zh":"政策中的中文名","kind":"topic","confidence":0.8,"evidence_refs":["ref"]}]}]}"""
+READER_CONTENT_SYSTEM_PROMPT = (
+    CONTENT_SYSTEM_PROMPT
+    + " 本任务面向站内内容卡片。必须把英文标题和正文改写成自然中文，品牌和产品专名可保留原文。"
+    "生成1—3句事实摘要，不要写成目录、流程说明或评价。"
+    "禁止输出作者、编辑、图源、阅读时长、导航、广告、页脚、登录或分享引导。"
+    "domain_policy 为空时 tags 可为0—8个中文标签，label_zh 必须含汉字，禁止 IPO、TikTok Shop 这类纯外文标签；没有合适中文标签就输出空数组。"
+    "摘要里的数字必须逐字出现在 evidence 中，禁止换算、补全或估算。"
+)
+
 EDITION_SYSTEM_PROMPT = """你是中文日报编排编辑。只使用已校验的单篇工件、事件关系、确定性 metrics 和领域 policy 输出 JSON。schema_version 固定为 daily_edition.zh.v1。只能使用 policy.section_catalog 中的 section_key，title 必须逐字复制对应栏目标题；只输出有故事的栏目并遵守 layout_policy 与 ranking_policy。输入会额外提供 expected_story_refs；输出前必须逐项核对：expected_story_refs 中每一项都要在所有 section.story_refs 中恰好出现一次，不得新增、遗漏、重复、改写或合并；sections 数组和每个 story_refs 数组的顺序就是最终版面顺序。intro_story_refs 必须是本栏目 story_refs 的非空子集。不得用正文长度直接判断重要性，不得从共同标签推断趋势，不得补充因果、影响、预测或市场结论。daily_lead 只写本期事实要点，禁止“本期整理/收录N条”“与某某相关的已发布资讯”等计数或流程说明。JSON 形状：{"schema_version":"daily_edition.zh.v1","daily_lead":{"deck":"string","text":"string","story_refs":["story_ref"]},"sections":[{"section_key":"policy_key","title":"政策中的栏目标题","intro":"中文导语","intro_story_refs":["story_ref"],"story_refs":["story_ref"]}]}"""
 
 
@@ -222,8 +253,24 @@ def _chunk_ranges(value: str, limit: int = 700) -> list[tuple[int, int]]:
     return ranges
 
 
+def _evidence_field_text(content: ContentItem) -> dict[str, str]:
+    from .event_signature import clean_title
+    from .reader_cards import sanitize_article_text
+
+    title = clean_title(content.title) or (content.title or "")
+    excerpt = sanitize_article_text(content.excerpt, title=title)[:READER_EVIDENCE_EXCERPT_CHARS]
+    body = sanitize_article_text(content.body, title=title)[:READER_EVIDENCE_BODY_CHARS]
+    topics = "\n".join(str(x) for x in (content.topics or []) if x)
+    return {
+        "title": title.strip(),
+        "excerpt": excerpt.strip(),
+        "body": body.strip(),
+        "topics": topics.strip(),
+    }
+
+
 def build_evidence_manifest(content: ContentItem) -> list[EvidenceSpan]:
-    values = {"title": content.title or "", "excerpt": content.excerpt or "", "body": content.body or "", "topics": "\n".join(str(x) for x in (content.topics or []) if x)}
+    values = _evidence_field_text(content)
     spans = []
     for field, value in values.items():
         if not value.strip():
@@ -279,6 +326,15 @@ def _is_supported_number(
             chinese_unit = unit
             break
     if chinese_unit:
+        scale = Decimal(100000000) if chinese_unit == "亿" else Decimal(10000)
+        for source in _numbers(evidence_text):
+            if source.endswith("%"):
+                continue
+            try:
+                if Decimal(source.replace(",", "")) == target * scale:
+                    return True
+            except InvalidOperation:
+                pass
         conversions = {
             "亿": ((r"(?:billion|bn)", Decimal(10)), (r"(?:million|mn)", Decimal("0.01"))),
             "万": ((r"(?:billion|bn)", Decimal(100000)), (r"(?:million|mn)", Decimal(100))),
@@ -390,6 +446,201 @@ def _validate_content_batch(
                     )
 
 
+def contents_missing_editorials(
+    session: Session,
+    articles: list[tuple[ContentItem, Source]],
+) -> list[tuple[ContentItem, Source]]:
+    ids = [content.id for content, _source in articles if content.id is not None]
+    hashes: dict[int, str] = {}
+    if ids:
+        rows = session.scalars(
+            select(LLMProcessingResult)
+            .where(
+                LLMProcessingResult.subject_type == "content_item",
+                LLMProcessingResult.task_name == CONTENT_TASK_NAME,
+                LLMProcessingResult.status == "succeeded",
+                LLMProcessingResult.subject_key.in_([f"content:{item}" for item in ids]),
+            )
+            .order_by(LLMProcessingResult.id)
+        )
+        for row in rows:
+            if (
+                row.schema_version != CONTENT_SCHEMA_VERSION
+                or row.validator_version != CONTENT_VALIDATOR_VERSION
+            ):
+                continue
+            try:
+                content_id = int(row.subject_key.split(":", 1)[1])
+            except (ValueError, IndexError):
+                continue
+            output = row.output or {}
+            if not isinstance(output, dict):
+                continue
+            title = str(output.get("chinese_title") or "").strip()
+            units = output.get("summary_units") or []
+            summary = str(output.get("chinese_summary") or "").strip()
+            if not title or not (units or summary):
+                continue
+            hashes[content_id] = str(output.get("input_content_hash") or "")
+    return [
+        (content, source)
+        for content, source in articles
+        if hashes.get(content.id) != content.content_hash
+    ]
+
+
+def beijing_day_start_utc(now: datetime | None = None) -> datetime:
+    current = now.astimezone(BEIJING_TZ) if now else datetime.now(BEIJING_TZ)
+    start = current.replace(hour=0, minute=0, second=0, microsecond=0)
+    return start.astimezone(UTC)
+
+
+def reader_editorials_used_today(session: Session, *, now: datetime | None = None) -> int:
+    start = beijing_day_start_utc(now)
+    count = session.scalar(
+        select(func.count(LLMProcessingResult.id)).where(
+            LLMProcessingResult.task_name == CONTENT_TASK_NAME,
+            LLMProcessingResult.status == "succeeded",
+            LLMProcessingResult.created_at >= start,
+        )
+    )
+    return int(count or 0)
+
+
+def ensure_reader_editorials(
+    session: Session,
+    articles: list[tuple[ContentItem, Source]],
+    client: DeepSeekClient,
+    *,
+    limit: int = READER_CRAWL_LIMIT,
+    batch_size: int = READER_CONTENT_BATCH_SIZE,
+    daily_limit: int = READER_EDITORIAL_DAILY_LIMIT,
+    refresh: bool = False,
+) -> dict:
+    used_today = reader_editorials_used_today(session)
+    remaining = max(0, daily_limit - used_today)
+    limit = min(max(0, limit), remaining)
+    if limit == 0:
+        return {
+            "processed": 0,
+            "missing": 0,
+            "skipped": "daily_limit",
+            "used_today": used_today,
+            "daily_limit": daily_limit,
+        }
+    missing = contents_missing_editorials(session, articles)
+    if refresh:
+        have = [
+            pair
+            for pair in articles
+            if pair[0].id not in {content.id for content, _source in missing}
+        ]
+        missing = [*missing, *have]
+    missing = missing[:limit]
+    usable: list[tuple[ContentItem, Source]] = []
+    skipped_empty = 0
+    for pair in missing:
+        try:
+            build_content_editorial_input(*pair)
+        except ValueError:
+            skipped_empty += 1
+            continue
+        usable.append(pair)
+    if not usable:
+        return {
+            "processed": 0,
+            "missing": 0,
+            "skipped_empty": skipped_empty,
+            "used_today": used_today,
+            "daily_limit": daily_limit,
+        }
+    try:
+        artifacts, cache_hit, usage = process_content_editorials(
+            session,
+            usable,
+            client,
+            policy=None,
+            refresh=refresh,
+            batch_size=batch_size,
+            system_prompt=READER_CONTENT_SYSTEM_PROMPT,
+        )
+        return {
+            "processed": len(artifacts),
+            "missing": len(usable),
+            "skipped_empty": skipped_empty,
+            "cache_hit": cache_hit,
+            "total_tokens": usage.total_tokens,
+            "used_today": used_today + len(artifacts),
+            "daily_limit": daily_limit,
+        }
+    except (ValidationError, ValueError, RuntimeError):
+        logger.exception("reader editorial batch failed; retrying individually")
+        processed = 0
+        failed = 0
+        for pair in usable:
+            try:
+                part, _hit, _usage = process_content_editorials(
+                    session,
+                    [pair],
+                    client,
+                    policy=None,
+                    refresh=refresh,
+                    batch_size=1,
+                    system_prompt=READER_CONTENT_SYSTEM_PROMPT,
+                )
+                processed += len(part)
+            except Exception:
+                logger.exception("reader editorial failed content_id=%s", pair[0].id)
+                failed += 1
+        return {
+            "processed": processed,
+            "missing": len(usable),
+            "skipped_empty": skipped_empty,
+            "failed": failed,
+            "partial": True,
+            "used_today": used_today + processed,
+            "daily_limit": daily_limit,
+        }
+
+
+
+def _coerce_reader_editorial_output(output: object) -> object:
+    if not isinstance(output, dict):
+        return output
+    items = output.get("items")
+    if not isinstance(items, list):
+        return output
+    coerced = []
+    for item in items:
+        if not isinstance(item, dict):
+            coerced.append(item)
+            continue
+        tags = []
+        for tag in item.get("tags") or []:
+            if not isinstance(tag, dict):
+                continue
+            try:
+                parsed = EditorialTag.model_validate(tag)
+            except ValidationError:
+                continue
+            tags.append(parsed.model_dump())
+        updated = dict(item)
+        updated["tags"] = tags
+        coerced.append(updated)
+    return {**output, "items": coerced}
+
+
+def _parse_content_editorial_batch(
+    output: object,
+    inputs: list[ContentEditorialInput],
+    policy: EditorialPolicy | None,
+) -> ContentEditorialBatch:
+    payload = _coerce_reader_editorial_output(output) if policy is None else output
+    batch = ContentEditorialBatch.model_validate(payload)
+    _validate_content_batch(batch, inputs, policy)
+    return batch
+
+
 def process_content_editorials(
     session: Session,
     articles: list[tuple[ContentItem, Source]],
@@ -429,8 +680,7 @@ def process_content_editorials(
         )
         response = client.generate_json(system_prompt=system_prompt, user_prompt=prompt)
         try:
-            batch = ContentEditorialBatch.model_validate(response.output)
-            _validate_content_batch(batch, chunk_inputs, policy)
+            batch = _parse_content_editorial_batch(response.output, chunk_inputs, policy)
         except (ValidationError, ValueError) as exc:
             repair = client.generate_json(
                 system_prompt=system_prompt,
@@ -445,8 +695,7 @@ def process_content_editorials(
                 repair.output,
                 _usage_sum([response.usage, repair.usage]),
             )
-            batch = ContentEditorialBatch.model_validate(response.output)
-            _validate_content_batch(batch, chunk_inputs, policy)
+            batch = _parse_content_editorial_batch(response.output, chunk_inputs, policy)
         usages.append(response.usage)
         for item, (_, fp) in zip(batch.items, chunk, strict=True):
             artifacts[item.content_ref] = item

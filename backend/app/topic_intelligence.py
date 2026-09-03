@@ -28,7 +28,7 @@ from .models import (
     TopicMatch,
     TopicRun,
 )
-from .topic_matching import MATCHER_VERSION
+from .topic_matching import MATCHER_VERSION, compile_topic_intent
 
 INTENT_TASK = "topic_intent_llm"
 INTENT_SCHEMA = "topic-intent.llm.v1"
@@ -40,7 +40,9 @@ CONTENT_VALIDATOR = "topic-content-editorial-validator.v1"
 INTENT_SYSTEM_PROMPT = """你是资讯订阅主题分析器。只分析用户输入，不扩展成无关行业。
 输出严格 JSON，schema_version 固定为 topic-intent.llm.v1。
 把自然语言拆为行业、产品、实体、事件类型、地区、正向关键词、排除关键词和中英搜索扩展。
-关键词要覆盖同义表达但保持精确；用户明确排除项不得删除。不要解释。
+positive_keywords 与 query_expansions 必须同时覆盖中文和英文等价说法，
+包括常见缩写、连字符与空格变体，但不要扩到无关行业。
+excluded_keywords 也要中英对照；用户明确排除项不得删除。不要解释。
 JSON 形状只能是：{"schema_version":"topic-intent.llm.v1","topic_id":1,
 "source_intent_hash":"sha256","industries":[],"products":[],"entities":[],
 "event_types":[],"geographies":[],"positive_keywords":[],"excluded_keywords":[],
@@ -179,6 +181,9 @@ def _normalize_content_output(
 
 def _intent_source(topic: InterestTopic) -> dict:
     current = topic.compiled_intent or {}
+    local, _hash = compile_topic_intent(topic.intent_text or topic.name or "主题")
+    user_positive = list(current.get("user_positive_keywords") or [])
+    user_excluded = list(local.get("excluded_keywords") or [])
     return {
         "topic_id": topic.id,
         "name": topic.name,
@@ -186,20 +191,12 @@ def _intent_source(topic: InterestTopic) -> dict:
         "source_intent_hash": _stable_hash(
             {
                 "intent_text": topic.intent_text,
-                "user_positive_keywords": current.get(
-                    "user_positive_keywords", current.get("positive_keywords", [])
-                ),
-                "user_excluded_keywords": current.get(
-                    "user_excluded_keywords", current.get("excluded_keywords", [])
-                ),
+                "user_positive_keywords": user_positive,
+                "user_excluded_keywords": user_excluded,
             }
         ),
-        "user_positive_keywords": current.get(
-            "user_positive_keywords", current.get("positive_keywords", [])
-        ),
-        "user_excluded_keywords": current.get(
-            "user_excluded_keywords", current.get("excluded_keywords", [])
-        ),
+        "user_positive_keywords": user_positive,
+        "user_excluded_keywords": user_excluded,
     }
 
 

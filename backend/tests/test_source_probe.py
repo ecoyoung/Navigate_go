@@ -4,6 +4,7 @@ from pathlib import Path
 import httpx
 import pytest
 
+from app.auth import create_user
 from app.outbound_policy import UnsafeOutboundURLError, validate_public_http_url
 from app.source_probe import (
     ProbeDocument,
@@ -12,6 +13,8 @@ from app.source_probe import (
     pipeline_to_legacy_parser_config,
 )
 from app.source_probe_fetch import ProbeFetchError, probe_public_url
+
+PASSWORD = "Admin-password-2026"
 
 FIXTURES = Path(__file__).parent / "fixtures" / "source_probe"
 NOW = datetime(2026, 8, 28, 10, tzinfo=UTC)
@@ -316,7 +319,21 @@ async def test_response_size_limit_is_enforced():
         )
 
 
-def test_api_source_registration_rejects_secret_bearing_request_config(client):
+def test_api_source_registration_rejects_secret_bearing_request_config(client, session_factory):
+    with session_factory() as db:
+        create_user(
+            db,
+            email="operator@example.com",
+            display_name="管理员",
+            password=PASSWORD,
+            role="admin",
+        )
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "operator@example.com", "password": PASSWORD},
+    )
+    assert login.status_code == 200
+
     response = client.post(
         "/api/v1/sources",
         json={

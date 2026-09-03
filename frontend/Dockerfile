@@ -8,13 +8,10 @@ RUN npm ci
 COPY index.html ./
 COPY tsconfig.json ./
 COPY vite.config.ts ./
-COPY vite.config.docker.ts ./
 COPY src ./src
-COPY app ./app
 COPY public ./public
-COPY server ./server
 
-RUN npx vue-tsc --noEmit && npx vite build --config vite.config.docker.ts
+RUN npx vue-tsc --noEmit && npx vite build
 
 FROM nginx:1.27-alpine
 

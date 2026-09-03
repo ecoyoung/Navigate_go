@@ -9,17 +9,22 @@ from app.editorial_policy import load_editorial_policy
 from app.event_clustering import apply_cluster_plan, build_cluster_plan
 from app.llm_editorial import (
     CONTENT_SCHEMA_VERSION,
+    CONTENT_VALIDATOR_VERSION,
     EDITION_SCHEMA_VERSION,
     DailyEdition,
     DeepSeekClient,
     LLMResponse,
     LLMUsage,
+    _coerce_reader_editorial_output,
     _complete_daily_edition,
     _derive_subset_edition,
     _is_supported_number,
     _validate_daily_edition,
     build_content_editorial_input,
+    build_evidence_manifest,
+    contents_missing_editorials,
     enrich_daily_report,
+    ensure_reader_editorials,
 )
 from app.models import (
     ContentItem,
@@ -494,3 +499,285 @@ def test_billion_to_yi_is_the_only_supported_numeric_localization():
     assert _is_supported_number("1", "The product is scheduled for January 2026") is True
     assert _is_supported_number("1.91", "Spa visits reached 191 million", "达到1.91亿次")
     assert not _is_supported_number("1.91", "Spa visits reached 191 million")
+    assert _is_supported_number("7", "The brand has 70,000 affiliate sellers.", "拥有7万名联盟卖家")
+    assert _is_supported_number("7", "The brand has 70000 affiliate sellers.", "拥有7万名联盟卖家")
+    assert not _is_supported_number("7", "The brand has 70,000 affiliate sellers.")
+
+
+
+def test_editorial_evidence_strips_byline_prefix():
+    content = ContentItem(
+        title="国内无人物流车转向市占率超50%丨36氪首发",
+        excerpt=(
+            "图源/企业 本文约 3300 字，建议阅读 8 分钟 作者丨欧雪 编辑丨袁斯来 "
+            "硬氪获悉，湖北汉鼎智能已完成数千万元战略轮融资。"
+        ),
+        body=(
+            "图源/企业 本文约 3300 字，建议阅读 8 分钟 作者丨欧雪 编辑丨袁斯来 "
+            "硬氪获悉，湖北汉鼎智能已完成数千万元战略轮融资。"
+        ),
+        content_hash="a" * 64,
+        topics=[],
+    )
+    content.id = 101
+    blob = " ".join(item.text for item in build_evidence_manifest(content))
+    assert "汉鼎智能" in blob
+    for noise in ("图源", "本文约", "建议阅读", "作者丨", "欧雪", "袁斯来"):
+        assert noise not in blob
+
+
+
+def test_reader_editorial_drops_non_chinese_tags():
+    output = _coerce_reader_editorial_output(
+        {
+            "schema_version": "content_editorial.zh.v2",
+            "items": [
+                {
+                    "tags": [
+                        {
+                            "tag_key": "ipo",
+                            "label_zh": "IPO",
+                            "kind": "event",
+                            "confidence": 0.9,
+                            "evidence_refs": ["r"],
+                        },
+                        {
+                            "tag_key": "男士护发",
+                            "label_zh": "男士护发",
+                            "kind": "topic",
+                            "confidence": 0.8,
+                            "evidence_refs": ["r"],
+                        },
+                        {
+                            "tag_key": "financing",
+                            "label_zh": "融资",
+                            "kind": "event",
+                            "confidence": 0.9,
+                            "evidence_refs": ["r"],
+                        },
+                    ]
+                }
+            ],
+        }
+    )
+    labels = [tag["label_zh"] for tag in output["items"][0]["tags"]]
+    assert labels == ["融资"]
+
+
+
+def test_editorial_evidence_truncates_long_body():
+    content = ContentItem(
+        title="长文标题测试",
+        excerpt="摘要。" * 400,
+        body="正文段落。" * 800,
+        content_hash="c" * 64,
+        topics=[],
+    )
+    content.id = 7
+    fields: dict[str, str] = {}
+    for span in build_evidence_manifest(content):
+        fields[span.field] = fields.get(span.field, "") + span.text
+    assert len(fields.get("excerpt", "")) <= 1200
+    assert len(fields.get("body", "")) <= 2500
+    assert "正文段落" in fields["body"]
+
+
+def test_deepseek_payload_omits_max_tokens(monkeypatch):
+    captured: dict = {}
+
+    class FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict:
+            return {
+                "choices": [{"finish_reason": "stop", "message": {"content": "{}"}}],
+                "usage": {},
+            }
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            return None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def post(self, url, headers=None, json=None):
+            captured["payload"] = json
+            return FakeResponse()
+
+    monkeypatch.setattr("app.llm_editorial.httpx.Client", FakeClient)
+    DeepSeekClient(api_key="test-key").generate_json(system_prompt="s", user_prompt="{}")
+    payload = captured["payload"]
+    assert "max_tokens" not in payload
+    assert "max_completion_tokens" not in payload
+
+
+class _BoomClient:
+    model = "deepseek-v4-flash"
+    provider = "deepseek"
+
+    def generate_json(self, **kwargs):
+        raise AssertionError("daily limit should not call the model")
+
+
+def test_reader_editorials_respect_daily_limit(session_factory):
+    with session_factory() as session:
+        source = Source(
+            name="Limit Desk",
+            channel_type="web",
+            start_url="https://limit.example.com/",
+            normalized_start_url="https://limit.example.com/",
+            parser_config={},
+        )
+        session.add(source)
+        session.flush()
+        session.add(
+            LLMProcessingResult(
+                subject_type="content_item",
+                subject_key="content:1",
+                task_name="content_editorial_zh",
+                task_version="content_editorial.zh.v2",
+                input_hash="d" * 64,
+                provider="test",
+                model="test",
+                cache_key="daily-limit",
+                status="succeeded",
+                output={"chinese_title": "已用额度", "summary_units": []},
+                created_at=datetime.now(UTC),
+            )
+        )
+        session.commit()
+        stats = ensure_reader_editorials(session, [], _BoomClient(), daily_limit=1)
+        assert stats["processed"] == 0
+        assert stats["skipped"] == "daily_limit"
+        assert stats["used_today"] == 1
+
+
+
+def _reader_article(session, slug: str = "story"):
+    source = Source(
+        name="Reader Desk",
+        channel_type="web",
+        start_url="https://reader.example.com/",
+        normalized_start_url="https://reader.example.com/",
+        parser_config={},
+    )
+    session.add(source)
+    session.flush()
+    run = CrawlRun(
+        source_id=source.id,
+        status="succeeded",
+        started_at=datetime(2026, 9, 3, 0, tzinfo=UTC),
+        finished_at=datetime(2026, 9, 3, 1, tzinfo=UTC),
+    )
+    session.add(run)
+    session.flush()
+    ingest_article(
+        session,
+        source,
+        run,
+        {
+            "title": "A global brand launches a fragrance",
+            "canonical_url": f"https://reader.example.com/{slug}",
+            "original_url": f"https://reader.example.com/{slug}",
+            "author": None,
+            "published_at": datetime(2026, 9, 3, 0, 20, tzinfo=UTC),
+            "body": "The brand introduced a fragrance and described its product strategy. " * 20,
+            "description": "The brand introduced a fragrance.",
+            "content_type": "article",
+            "topics": [],
+        },
+    )
+    content = session.scalar(select(ContentItem).order_by(ContentItem.id.desc()))
+    session.commit()
+    return content, source
+
+
+def test_stale_validator_editorials_are_missing(session_factory):
+    with session_factory() as session:
+        content, source = _reader_article(session)
+        session.add(
+            LLMProcessingResult(
+                subject_type="content_item",
+                subject_key=f"content:{content.id}",
+                task_name="content_editorial_zh",
+                task_version=CONTENT_SCHEMA_VERSION,
+                schema_version=CONTENT_SCHEMA_VERSION,
+                validator_version="content-editorial-validator.v5",
+                input_hash=content.content_hash,
+                provider="test",
+                model="test",
+                cache_key="stale-validator",
+                status="succeeded",
+                output={
+                    "chinese_title": "旧版中文标题卡片",
+                    "input_content_hash": content.content_hash,
+                    "summary_units": [
+                        {
+                            "claim_ref": f"content:{content.id}#summary:1",
+                            "text_zh": "这是旧版摘要。",
+                            "evidence_refs": ["ref-1"],
+                        }
+                    ],
+                },
+            )
+        )
+        session.commit()
+        missing = contents_missing_editorials(session, [(content, source)])
+        assert missing == [(content, source)]
+
+
+def test_current_validator_editorials_are_cached(session_factory):
+    with session_factory() as session:
+        content, source = _reader_article(session)
+        session.add(
+            LLMProcessingResult(
+                subject_type="content_item",
+                subject_key=f"content:{content.id}",
+                task_name="content_editorial_zh",
+                task_version=CONTENT_SCHEMA_VERSION,
+                schema_version=CONTENT_SCHEMA_VERSION,
+                validator_version=CONTENT_VALIDATOR_VERSION,
+                input_hash=content.content_hash,
+                provider="test",
+                model="test",
+                cache_key="current-validator",
+                status="succeeded",
+                output={
+                    "chinese_title": "现行中文标题卡片",
+                    "input_content_hash": content.content_hash,
+                    "summary_units": [
+                        {
+                            "claim_ref": f"content:{content.id}#summary:1",
+                            "text_zh": "这是现行摘要。",
+                            "evidence_refs": ["ref-1"],
+                        }
+                    ],
+                },
+            )
+        )
+        session.commit()
+        assert contents_missing_editorials(session, [(content, source)]) == []
+
+
+def test_reader_editorials_refresh_rewrites_existing(session_factory):
+    with session_factory() as session:
+        content, source = _reader_article(session)
+        client = FakeEditorialClient()
+        first = ensure_reader_editorials(session, [(content, source)], client, limit=1)
+        assert first["processed"] == 1
+        assert client.calls == 1
+        second = ensure_reader_editorials(session, [(content, source)], client, limit=1)
+        assert second["processed"] == 0
+        assert client.calls == 1
+        third = ensure_reader_editorials(
+            session, [(content, source)], client, limit=1, refresh=True
+        )
+        assert third["processed"] == 1
+        assert client.calls == 2

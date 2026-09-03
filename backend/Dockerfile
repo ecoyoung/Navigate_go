@@ -17,11 +17,11 @@ COPY app ./app
 COPY alembic ./alembic
 COPY alembic.ini ./
 COPY config ./config
-COPY scripts/docker-entrypoint.sh ./docker-entrypoint.sh
+COPY scripts ./scripts
 
 RUN uv sync --frozen --no-dev \
-    && chmod +x docker-entrypoint.sh
+    && chmod +x scripts/docker-entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./scripts/docker-entrypoint.sh"]

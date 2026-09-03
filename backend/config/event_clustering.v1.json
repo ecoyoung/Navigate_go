@@ -1,6 +1,6 @@
 {
   "schema_version": "event-clustering-config.v1",
-  "algorithm_version": "local-char-ngram.v1",
+  "algorithm_version": "bilingual-signature.v2",
   "candidate_window_hours": 168,
   "title_ngram_size": 3,
   "lead_text_chars": 420,
@@ -8,10 +8,11 @@
   "review_threshold": 0.58,
   "minimum_member_score": 0.72,
   "weights": {
-    "title": 0.62,
-    "lead_text": 0.16,
-    "topics": 0.05,
-    "numbers": 0.09,
-    "time": 0.08
+    "title": 0.48,
+    "signature": 0.22,
+    "lead_text": 0.14,
+    "topics": 0.04,
+    "numbers": 0.06,
+    "time": 0.06
   }
 }

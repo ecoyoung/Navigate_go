@@ -32,7 +32,21 @@ from .run_coverage import resolve_run_coverage
 
 USER_AGENT = "NavigateBot/0.1 (+content intelligence; respectful crawler)"
 SNAPSHOT_HEADER_NAMES = ("cache-control", "content-type", "date", "etag", "last-modified")
+MANUAL_ARTICLE_FLOOR = 10
 logger = logging.getLogger("navigate.crawl")
+
+
+def article_limit(config: dict | None, *, trigger: str | None = None) -> int:
+    raw = int((config or {}).get("max_articles") or 10)
+    if trigger == "manual":
+        raw = max(raw, MANUAL_ARTICLE_FLOOR)
+    return min(max(raw, 1), 50)
+
+
+def parser_config_for_run(source: Source, run: CrawlRun) -> dict:
+    config = dict(source.parser_config or {})
+    config["max_articles"] = article_limit(config, trigger=run.trigger)
+    return config
 
 
 class ActiveCrawlConflict(RuntimeError):
@@ -995,12 +1009,16 @@ def preserve_verified_detail(extracted: dict, content: ContentItem) -> dict:
     return merged
 
 
-def source_publication_window_days(session: Session, source: Source) -> int:
+def source_publication_window_days(
+    session: Session, source: Source, *, trigger: str | None = None
+) -> int:
     """First successful ingestion gets a short backfill; later runs are D-1 only."""
     has_content = session.scalar(
         select(ContentItem.id).where(ContentItem.source_id == source.id).limit(1)
     )
     config = source.parser_config or {}
+    if trigger == "manual":
+        return max(0, int(config.get("manual_publication_window_days", 7)))
     key = (
         "incremental_publication_window_days" if has_content else "initial_publication_window_days"
     )
@@ -1067,7 +1085,7 @@ async def crawl_http_source(
         feed_plan = None
         direct_feed = False
         try:
-            config = source.parser_config or {}
+            config = parser_config_for_run(source, run)
             async with httpx.AsyncClient(
                 follow_redirects=True,
                 timeout=max(float(config.get("http_timeout_seconds", 12)), 5),
@@ -1170,7 +1188,7 @@ async def crawl_http_source(
                 if not article_urls and not outcome.allow_empty:
                     raise ValueError("no_article_urls_discovered")
                 delay = max(float(config.get("request_delay_seconds", 2)), 0.5)
-                window_days = source_publication_window_days(session, source)
+                window_days = source_publication_window_days(session, source, trigger=run.trigger)
                 for article_url in article_urls:
                     fetched_count += 1
                     try:
