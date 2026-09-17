@@ -1,3 +1,5 @@
+**简体中文** | [English](README.en.md)
+
 # Navigate 通用资讯平台
 
 Navigate 把网站、RSS/Atom、Sitemap、JSON API 和经授权的第三方 API 收成统一内容池，再为主题订阅生成中文卡片和每日简报。正式界面是 Vue 工作台，数据走 FastAPI，部署在本机 Docker，并通过 Cloudflare Tunnel 暴露域名。
